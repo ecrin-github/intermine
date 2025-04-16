@@ -173,22 +173,21 @@ public class SourcePriorityComparator implements Comparator<InterMineObject>
                             + " does not include source " + source2.getName();
                     }
                 }
-                if (errorMessage != null) {
-                    if ((value1 == null) && (value2 == null)) {
-                        return (o1 == defObj ? 1 : -1);
-                    }
-                    if (value1 == null) {
-                        return -1;
-                    }
-                    if (value2 == null) {
-                        return 1;
-                    }
+
+                if ((value1 == null) && (value2 == null)) {
+                    return (o1 == defObj ? 1 : -1);
+                } else if (value1 == null) {
+                    return -1;
+                } else if (value2 == null) {
+                    return 1;
+                } else if (errorMessage != null) {
                     LOG.error(errorMessage);
                     throw new IllegalArgumentException(errorMessage);
-                }
-                int retval = source2Priority - source1Priority;
-                if (retval != 0) {
-                    return retval;
+                } else {
+                    int retval = source2Priority - source1Priority;
+                    if (retval != 0) {
+                        return retval;
+                    }
                 }
             }
         }
