@@ -173,6 +173,7 @@ public class SourcePriorityComparator implements Comparator<InterMineObject>
                             + " does not include source " + source2.getName();
                     }
                 }
+
                 if ((value1 == null) && (value2 == null)) {
                     return (o1 == defObj ? 1 : -1);
                 } else if (value1 == null) {

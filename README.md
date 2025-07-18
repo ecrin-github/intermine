@@ -1,6 +1,12 @@
 InterMine
 ============
 
+Modified version of InterMine to always take non-empty values when merging 2 sources on the same field.
+
+`update_jars_local.sh` needs to be run to locally update Intermine JARs
+
+---
+
 Master: [![InterMine CI](https://github.com/intermine/intermine/workflows/InterMine%20CI/badge.svg?branch=master)](https://github.com/intermine/intermine/actions?query=workflow%3A%22InterMine+CI%22)
 Dev: [![InterMine CI](https://github.com/intermine/intermine/workflows/InterMine%20CI/badge.svg?branch=dev)](https://github.com/intermine/intermine/actions?query=workflow%3A%22InterMine+CI%22)
 [![Version](http://img.shields.io/badge/version-5.1.0-blue.svg?style=flat)](https://github.com/intermine/intermine/releases)
@@ -8,7 +14,7 @@ Dev: [![InterMine CI](https://github.com/intermine/intermine/workflows/InterMine
 [![Research software impact](http://depsy.org/api/package/pypi/intermine/badge.svg)](http://depsy.org/package/python/intermine)
 [![Conda](https://anaconda.org/anaconda/conda-build/badges/installer/conda.svg)](https://anaconda.org/bioconda/intermine)
 [![Documentation Status](https://readthedocs.org/projects/intermine/badge/?version=latest)](https://intermine.readthedocs.io/en/latest/?badge=latest)
-f
+
 A powerful open source data warehouse system. InterMine allows users
 to integrate diverse data sources with a minimum of effort, providing
 powerful web-services and an elegant web-application with minimal
