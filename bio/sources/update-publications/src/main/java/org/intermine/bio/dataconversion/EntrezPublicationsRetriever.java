@@ -92,7 +92,7 @@ public class EntrezPublicationsRetriever
     private ItemFactory itemFactory;
     private boolean loadFullRecord = false;
     private Map<String, Item> meshTerms = new HashMap<String, Item>();
-    private static final int POSTGRES_INDEX_SIZE = 2712;
+    private static final int POSTGRES_INDEX_SIZE = 2704;    // Max size was reduced in Postgres 12
 
     /**
      * Load summary version of Publication record by default. If this boolean (loadFullRecord)
@@ -417,9 +417,9 @@ public class EntrezPublicationsRetriever
             // see https://github.com/intermine/intermine/issues/2009
             if (abstractText.length() > POSTGRES_INDEX_SIZE) {
                 String ellipses = "...";
-                String choppedAbtract = abstractText.substring(
+                String choppedAbstract = abstractText.substring(
                         0, POSTGRES_INDEX_SIZE - ellipses.length());
-                publication.setAttribute("abstractText", choppedAbtract + ellipses);
+                publication.setAttribute("abstractText", choppedAbstract + ellipses);
             } else {
                 publication.setAttribute("abstractText", abstractText);
             }
@@ -588,12 +588,27 @@ public class EntrezPublicationsRetriever
                 pubMap.put("pages", characters.toString());
             } else if ("AbstractText".equals(qName)) {
                 String abstractText = (String) pubMap.get("abstractText");
+
                 if (StringUtils.isEmpty(abstractText)) {
                     abstractText = characters.toString();
+                    // System.out.println("abstractText1: " + abstractText.length());
                 } else {
-                    abstractText += " " + characters.toString();
+                    abstractText = abstractText + " " + characters.toString();
+                    // System.out.println("abstractText2: " + abstractText.length());
                 }
+
+                // see https://github.com/intermine/intermine/issues/2009
+                // TOOD: refactor with code in mapToItems
+                if (abstractText.length() > POSTGRES_INDEX_SIZE) {
+                    String ellipses = "...";
+                    String choppedAbstract = abstractText.substring(
+                            0, POSTGRES_INDEX_SIZE - ellipses.length());
+                    abstractText = choppedAbstract + ellipses;
+                    // System.out.println("abstractText3: " + abstractText.length());
+                }
+
                 pubMap.put("abstractText", abstractText);
+                // System.out.println("abstractText4: " + ((String)pubMap.get("abstractText")).length());
             } else if ("Month".equalsIgnoreCase(qName) && !stack.isEmpty()
                     && "PubDate".equals(stack.peek())) {
                 pubMap.put("month", characters.toString());
