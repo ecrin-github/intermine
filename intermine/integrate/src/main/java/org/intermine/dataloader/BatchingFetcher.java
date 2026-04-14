@@ -483,42 +483,44 @@ public class BatchingFetcher extends HintingFetcher {
             // }
             // }
 
-            // Constructing DB query
-            // "IN" check in SQL does not work with null values, so if a pk field can be
-            // null, We have to check for "IN values OR IS NULL"
-            for (String fieldName : pk.getFieldNames()) {
-                try {
-                    QueryField qf = new QueryField(qc, fieldName);
-                    if (nullableFieldNames.contains(fieldName)) {
-                        ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
+            if (objCount > 0) {
+                // Constructing DB query
+                // "IN" check in SQL does not work with null values, so if a pk field can be
+                // null, We have to check for "IN values OR IS NULL"
+                for (String fieldName : pk.getFieldNames()) {
+                    try {
+                        QueryField qf = new QueryField(qc, fieldName);
+                        if (nullableFieldNames.contains(fieldName)) {
+                            ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
 
-                        csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
-                        q.addToSelect(qf);
-                        csOr.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                            csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
+                            q.addToSelect(qf);
+                            csOr.addConstraint(
+                                    new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
 
-                        cs.addConstraint(csOr);
-                    } else {
-                        q.addToSelect(qf);
-                        cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
-                    }
-                } catch (IllegalArgumentException e) {
-                    QueryForeignKey qf = new QueryForeignKey(qc, fieldName);
-                    if (nullableFieldNames.contains(fieldName)) {
-                        ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
+                            cs.addConstraint(csOr);
+                        } else {
+                            q.addToSelect(qf);
+                            cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                        }
+                    } catch (IllegalArgumentException e) {
+                        QueryForeignKey qf = new QueryForeignKey(qc, fieldName);
+                        if (nullableFieldNames.contains(fieldName)) {
+                            ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
 
-                        csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
-                        q.addToSelect(qf);
-                        csOr.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                            csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
+                            q.addToSelect(qf);
+                            csOr.addConstraint(
+                                    new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
 
-                        cs.addConstraint(csOr);
-                    } else {
-                        q.addToSelect(qf);
-                        cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                            cs.addConstraint(csOr);
+                        } else {
+                            q.addToSelect(qf);
+                            cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                        }
                     }
                 }
-            }
 
-            if (objCount > 0) {
                 // Iterate through query, and add objects to results
                 // long time = System.currentTimeMillis();
                 int matches = 0;
