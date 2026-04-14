@@ -44,27 +44,27 @@ import org.intermine.metadata.StringUtil;
 import org.intermine.metadata.TypeUtil;
 
 /**
- * Class providing utility methods to help with primary key and data source priority configuration
+ * Class providing utility methods to help with primary key and data source
+ * priority configuration
  *
  * @author Andrew Varley
  * @author Mark Woodbridge
  * @author Richard Smith
  * @author Matthew Wakeling
  */
-public final class DataLoaderHelper
-{
+public final class DataLoaderHelper {
     private DataLoaderHelper() {
     }
 
     private static final Logger LOG = Logger.getLogger(DataLoaderHelper.class);
 
     protected static Map<Source, Properties> sourceKeys = new HashMap<Source, Properties>();
-    protected static Map<Model, Map<String, List<String>>> modelDescriptors
-        = new IdentityHashMap<Model, Map<String, List<String>>>();
+    protected static Map<Model, Map<String, List<String>>> modelDescriptors = new IdentityHashMap<Model, Map<String, List<String>>>();
     protected static Set<Source> verifiedSources = new HashSet<Source>();
 
     /**
-     * Build a map from class and field names to a priority-ordered List of source name Strings.
+     * Build a map from class and field names to a priority-ordered List of source
+     * name Strings.
      *
      * @param model the Model
      * @return the Map
@@ -76,7 +76,7 @@ public final class DataLoaderHelper
             if (descriptorSources == null) {
                 descriptorSources = new HashMap<String, List<String>>();
                 Properties priorities = PropertiesUtil.loadProperties(model.getName()
-                                                                      + "_priorities.properties");
+                        + "_priorities.properties");
                 if (priorities == null) {
                     throw new RuntimeException("Could not load priorities config file "
                             + model.getName() + "_priorities.properties");
@@ -102,19 +102,23 @@ public final class DataLoaderHelper
         return descriptorSources;
     }
 
-    private static Map<GetPrimaryKeyCacheKey, Set<PrimaryKey>> getPrimaryKeyCache
-        = new HashMap<GetPrimaryKeyCacheKey, Set<PrimaryKey>>();
+    private static Map<GetPrimaryKeyCacheKey, Set<PrimaryKey>> getPrimaryKeyCache = new HashMap<GetPrimaryKeyCacheKey, Set<PrimaryKey>>();
 
     /**
-     * Return a Set of PrimaryKeys relevant to a given Source for a ClassDescriptor. The Set
-     * contains all the primary keys that exist on a particular class that are used by the
-     * source, without performing any recursion. The Model.getClassDescriptorsForClass()
-     * method is recommended if you wish for all the primary keys of the class' parents
+     * Return a Set of PrimaryKeys relevant to a given Source for a ClassDescriptor.
+     * The Set
+     * contains all the primary keys that exist on a particular class that are used
+     * by the
+     * source, without performing any recursion. The
+     * Model.getClassDescriptorsForClass()
+     * method is recommended if you wish for all the primary keys of the class'
+     * parents
      * as well.
      *
-     * @param cld the ClassDescriptor
+     * @param cld    the ClassDescriptor
      * @param source the Source
-     * @param os the ObjectStore that these PrimaryKeys are used in, for creating indexes
+     * @param os     the ObjectStore that these PrimaryKeys are used in, for
+     *               creating indexes
      * @return a Set of PrimaryKeys
      */
     public static Set<PrimaryKey> getPrimaryKeys(ClassDescriptor cld, Source source,
@@ -137,9 +141,9 @@ public final class DataLoaderHelper
                             if (!cldName.contains(".")) {
                                 ClassDescriptor iCld = cld.getModel().getClassDescriptorByName(
                                         packageNameWithDot + cldName);
-                                if  (iCld != null) {
+                                if (iCld != null) {
                                     Map<String, PrimaryKey> map = PrimaryKeyUtil
-                                        .getPrimaryKeys(iCld);
+                                            .getPrimaryKeys(iCld);
 
                                     String[] tokens = keyList.split(",");
                                     for (int i = 0; i < tokens.length; i++) {
@@ -193,16 +197,14 @@ public final class DataLoaderHelper
                                 if (!keySet.contains(pk)) {
                                     keySet.add(pk);
                                     if (os instanceof ObjectStoreInterMineImpl) {
-                                        ObjectStoreInterMineImpl osimi
-                                            = (ObjectStoreInterMineImpl) os;
+                                        ObjectStoreInterMineImpl osimi = (ObjectStoreInterMineImpl) os;
                                         DatabaseSchema schema = osimi.getSchema();
                                         ClassDescriptor tableMaster = schema.getTableMaster(cld);
                                         String tableName = DatabaseUtil.getTableName(tableMaster);
                                         List<String> fields = new ArrayList<String>();
 
                                         for (String field : pk.getFieldNames()) {
-                                            String colName =
-                                                DatabaseUtil.generateSqlCompatibleName(field);
+                                            String colName = DatabaseUtil.generateSqlCompatibleName(field);
                                             if (tableMaster.getReferenceDescriptorByName(field,
                                                     true) != null) {
                                                 colName += "id";
@@ -210,9 +212,10 @@ public final class DataLoaderHelper
                                             fields.add(colName);
                                         }
                                         String sql = "CREATE INDEX " + tableName + "__" + keyName
-                                            + " ON " + tableName + " (" + StringUtil.join(fields,
-                                                        ", ") + ")";
-                                        System.out .println("Creating index: " + sql);
+                                                + " ON " + tableName + " (" + StringUtil.join(fields,
+                                                        ", ")
+                                                + ")";
+                                        System.out.println("Creating index: " + sql);
                                         LOG.info("Creating index: " + sql);
                                         Connection conn = null;
                                         try {
@@ -241,13 +244,15 @@ public final class DataLoaderHelper
         }
     }
 
-
     /**
-     * Fetch all primary keys for the given source. Parses source keys properties file, can handle
-     * both 'old style' key definitions (key name used in source, details found in keyDefs file)
+     * Fetch all primary keys for the given source. Parses source keys properties
+     * file, can handle
+     * both 'old style' key definitions (key name used in source, details found in
+     * keyDefs file)
      * and 'new style' where whole key is defined in the source properties file.
+     * 
      * @param source name of source to fetch keys for
-     * @param model the data model
+     * @param model  the data model
      * @return a set of primary key objects
      */
     public static Set<PrimaryKey> getSourcePrimaryKeys(Source source, Model model) {
@@ -333,8 +338,8 @@ public final class DataLoaderHelper
 
                 if (keys == null) {
                     throw new RuntimeException("can't find keys for source: " + source
-                                               + " after trying to find: " + sourceNameKeysFileName
-                                               + " and: " + sourceTypeKeysFileName);
+                            + " after trying to find: " + sourceNameKeysFileName
+                            + " and: " + sourceTypeKeysFileName);
                 }
 
                 sourceKeys.put(source, keys);
@@ -343,25 +348,27 @@ public final class DataLoaderHelper
         return keys;
     }
 
-
     /**
-     * Look a the values of the given primary key in the object and return true if and only if some
-     * part of the primary key is null.  If the primary key contains a reference it is sufficient
-     * for any of the primary keys of the referenced object to be non-null (ie
-     * objectPrimaryKeyIsNull() returning true).
-     * @param model the Model in which to find ClassDescriptors
-     * @param obj the Object to check
-     * @param cld one of the classes that obj is.  Only primary keys for this classes will be
-     * checked
-     * @param pk the primary key to check
+     * Returns true if any of the values of the given primary key is not null.
+     * Otherwise (all values of the given primary key are null), returns false.
+     * If the primary key contains a reference, it is sufficient to consider
+     * the primary key not null.
+     * 
+     * @param model  the Model in which to find ClassDescriptors
+     * @param obj    the Object to check
+     * @param cld    one of the classes that obj is. Only primary keys for this
+     *               classes will be
+     *               checked
+     * @param pk     the primary key to check
      * @param source the Source database
-     * @param idMap an IntToIntMap from source IDs to destination IDs
+     * @param idMap  an IntToIntMap from source IDs to destination IDs
      * @return true if the the given primary key is non-null for the given object
      * @throws MetaDataException if anything goes wrong
      */
     public static boolean objectPrimaryKeyNotNull(Model model, InterMineObject obj,
             ClassDescriptor cld, PrimaryKey pk, Source source,
             IntToIntMap idMap) throws MetaDataException {
+
         for (String fieldName : pk.getFieldNames()) {
             FieldDescriptor fd = cld.getFieldDescriptorByName(fieldName);
             if (fd instanceof AttributeDescriptor) {
@@ -372,8 +379,9 @@ public final class DataLoaderHelper
                     throw new MetaDataException("Failed to get field " + fieldName
                             + " for key " + pk + " from " + obj, e);
                 }
-                if (value == null) {
-                    return false;
+
+                if (value != null) {
+                    return true;
                 }
             } else if (fd instanceof CollectionDescriptor) {
                 throw new MetaDataException("Primary key " + pk.getName() + " for class "
@@ -387,71 +395,33 @@ public final class DataLoaderHelper
                 } catch (IllegalAccessException e) {
                     throw new MetaDataException("Failed to get field " + fieldName
                             + " for key " + pk + " from " + obj, e);
-
-                }
-                if (refObj == null) {
-                    return false;
                 }
 
-                if ((refObj.getId() != null) && (idMap.get(refObj.getId()) != null)) {
-                    // We have previously loaded the object in this reference.
-                    continue;
-                }
-
-                if (refObj instanceof ProxyReference) {
-                    refObj = ((ProxyReference) refObj).getObject();
-                }
-
-                boolean foundNonNullKey = false;
-                boolean foundKey = false;
-                Set<ClassDescriptor> classDescriptors = model.getClassDescriptorsForClass(refObj
-                        .getClass());
-
-            CLDS:
-                for (ClassDescriptor refCld : classDescriptors) {
-                    Set<PrimaryKey> primaryKeys;
-
-                    if (source == null) {
-                        primaryKeys = new LinkedHashSet<PrimaryKey>(PrimaryKeyUtil
-                                .getPrimaryKeys(refCld).values());
-                    } else {
-                        primaryKeys = DataLoaderHelper.getPrimaryKeys(refCld, source, null);
-                    }
-
-                    for (PrimaryKey refPK : primaryKeys) {
-                        foundKey = true;
-
-                        if (objectPrimaryKeyNotNull(model, refObj, refCld, refPK, source, idMap)) {
-                            foundNonNullKey = true;
-                            break CLDS;
-                        }
-                    }
-                }
-
-                if (foundKey && (!foundNonNullKey)) {
-                    return false;
+                if (refObj != null) {
+                    return true;
                 }
             }
         }
 
-        return true;
+        return false;
     }
 
-    private static ThreadLocal<Map<PrimaryKeyCacheKey, Set<String>>> primaryKeyCache
-        = new ThreadLocal<Map<PrimaryKeyCacheKey, Set<String>>>() {
-            @Override protected Map<PrimaryKeyCacheKey, Set<String>> initialValue() {
-                return new HashMap<PrimaryKeyCacheKey, Set<String>>();
-            }
-        };
+    private static ThreadLocal<Map<PrimaryKeyCacheKey, Set<String>>> primaryKeyCache = new ThreadLocal<Map<PrimaryKeyCacheKey, Set<String>>>() {
+        @Override
+        protected Map<PrimaryKeyCacheKey, Set<String>> initialValue() {
+            return new HashMap<PrimaryKeyCacheKey, Set<String>>();
+        }
+    };
 
     /**
-     * Returns true if the given field is a member of any primary key on the given class, for the
+     * Returns true if the given field is a member of any primary key on the given
+     * class, for the
      * given source.
      *
-     * @param model the Model in which to find ClassDescriptors
-     * @param clazz the Class in which to look
+     * @param model     the Model in which to find ClassDescriptors
+     * @param clazz     the Class in which to look
      * @param fieldName the name of the field to check
-     * @param source the Source that the keys belong to
+     * @param source    the Source that the keys belong to
      * @return true if the field is a primary key
      */
     public static boolean fieldIsPrimaryKey(Model model, Class<?> clazz, String fieldName,
@@ -471,8 +441,7 @@ public final class DataLoaderHelper
         return fields.contains(fieldName);
     }
 
-    private static class PrimaryKeyCacheKey
-    {
+    private static class PrimaryKeyCacheKey {
         private Model model;
         private Class<?> clazz;
         private Source source;
@@ -493,14 +462,13 @@ public final class DataLoaderHelper
             if (o instanceof PrimaryKeyCacheKey) {
                 PrimaryKeyCacheKey pkck = (PrimaryKeyCacheKey) o;
                 return (model == pkck.model) && clazz.equals(pkck.clazz)
-                    && source.equals(pkck.source);
+                        && source.equals(pkck.source);
             }
             return false;
         }
     }
 
-    private static class GetPrimaryKeyCacheKey
-    {
+    private static class GetPrimaryKeyCacheKey {
         private ClassDescriptor cld;
         private Source source;
 

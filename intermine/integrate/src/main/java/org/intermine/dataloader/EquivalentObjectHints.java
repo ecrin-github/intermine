@@ -37,22 +37,20 @@ import org.intermine.util.AlwaysSet;
 import org.intermine.util.PseudoSet;
 
 /**
- * Object for holding hint data for the getEquivalentObjects method in IntegrationWriters.
+ * Object for holding hint data for the getEquivalentObjects method in
+ * IntegrationWriters.
  *
  * @author Matthew Wakeling
  */
-public class EquivalentObjectHints
-{
+public class EquivalentObjectHints {
     private static final Logger LOG = Logger.getLogger(EquivalentObjectHints.class);
     private static final int SUMMARY_SIZE = 100;
 
     private boolean databaseEmptyChecked = false;
     private boolean databaseEmpty = false;
     private Map<Class<?>, Boolean> classStatus = new HashMap<Class<?>, Boolean>();
-    private Map<ClassAndFieldName, Set<Object>> classAndFieldNameValues
-        = new HashMap<ClassAndFieldName, Set<Object>>();
-    private Map<ClassAndFieldName, Set<Object>> classAndFieldNameQueried
-        = new HashMap<ClassAndFieldName, Set<Object>>();
+    private Map<ClassAndFieldName, Set<Object>> classAndFieldNameValues = new HashMap<ClassAndFieldName, Set<Object>>();
+    private Map<ClassAndFieldName, Set<Object>> classAndFieldNameQueried = new HashMap<ClassAndFieldName, Set<Object>>();
     private Map<String, ClassAndFieldName> summaryToCafn = new HashMap<String, ClassAndFieldName>();
 
     private ObjectStore os;
@@ -134,12 +132,13 @@ public class EquivalentObjectHints
     }
 
     /**
-     * Returns true if there were no instances of the given class with the given field set to the
+     * Returns true if there were no instances of the given class with the given
+     * field set to the
      * given value.
      *
-     * @param clazz the class, must be in the model
+     * @param clazz     the class, must be in the model
      * @param fieldName the name of the field
-     * @param value the value
+     * @param value     the value
      * @return a boolean
      */
     public boolean pkQueryFruitless(Class<? extends FastPathObject> clazz, String fieldName,
@@ -222,11 +221,13 @@ public class EquivalentObjectHints
         } else if (queried instanceof IntegerRangeSet) {
             queried.add(value);
         }
+
         return !values.contains(value);
     }
 
     /**
-     * Returns a Set of values that have been tested for a particular class and fieldname.
+     * Returns a Set of values that have been tested for a particular class and
+     * fieldname.
      *
      * @param summaryName a String
      * @return a Set of values, or an AlwaysSet if too many values were tested
@@ -236,7 +237,8 @@ public class EquivalentObjectHints
     }
 
     /**
-     * Returns a Set of values that were in the database for a particular class and fieldname.
+     * Returns a Set of values that were in the database for a particular class and
+     * fieldname.
      *
      * @param summaryName a String
      * @return a Set of values, or an AlwaysSet if too many values were tested
@@ -245,8 +247,7 @@ public class EquivalentObjectHints
         return classAndFieldNameValues.get(summaryToCafn.get(summaryName));
     }
 
-    private static class ClassAndFieldName
-    {
+    private static class ClassAndFieldName {
         private Class<? extends FastPathObject> clazz;
         private String fieldName;
 
@@ -270,8 +271,7 @@ public class EquivalentObjectHints
         }
     }
 
-    private static class IntegerRangeSet extends PseudoSet<Object>
-    {
+    private static class IntegerRangeSet extends PseudoSet<Object> {
         private int low, high;
 
         public IntegerRangeSet() {
@@ -285,15 +285,20 @@ public class EquivalentObjectHints
         }
 
         public boolean contains(Object o) {
+            if (o == null) { // IntegerRangeSet cannot contain/check for null
+                return false;
+            }
             int i = ((Integer) o).intValue();
             return (i >= low) && (i <= high);
         }
 
         @Override
         public boolean add(Object o) {
-            int i = ((Integer) o).intValue();
-            low = Math.min(low, i);
-            high = Math.max(high, i);
+            if (o != null) { // Cannot add null in IntegerRangeSet
+                int i = ((Integer) o).intValue();
+                low = Math.min(low, i);
+                high = Math.max(high, i);
+            }
             return false;
         }
 

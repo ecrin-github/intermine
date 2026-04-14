@@ -46,22 +46,23 @@ import org.intermine.objectstore.query.QueryField;
 import org.intermine.objectstore.query.QueryForeignKey;
 import org.intermine.objectstore.query.Results;
 import org.intermine.objectstore.query.ResultsRow;
+import org.intermine.objectstore.query.SimpleConstraint;
 import org.intermine.objectstore.query.SingletonResults;
 import org.intermine.util.CollectionUtil;
 import org.intermine.util.ShutdownHook;
 import org.intermine.util.Shutdownable;
 
 /**
- * Class providing EquivalentObjectFetcher functionality that batches fetches to improve
+ * Class providing EquivalentObjectFetcher functionality that batches fetches to
+ * improve
  * performance.
  *
  * @author Matthew Wakeling
  */
-public class BatchingFetcher extends HintingFetcher
-{
+public class BatchingFetcher extends HintingFetcher {
     private static final Logger LOG = Logger.getLogger(BatchingFetcher.class);
     protected Map<InterMineObject, Set<InterMineObject>> equivalents = Collections
-        .synchronizedMap(new WeakHashMap<InterMineObject, Set<InterMineObject>>());
+            .synchronizedMap(new WeakHashMap<InterMineObject, Set<InterMineObject>>());
     protected DataTracker dataTracker;
     protected Source source;
     protected int batchQueried = 0;
@@ -73,9 +74,9 @@ public class BatchingFetcher extends HintingFetcher
     /**
      * Constructor
      *
-     * @param fetcher another EquivalentObjectFetcher
+     * @param fetcher     another EquivalentObjectFetcher
      * @param dataTracker a DataTracker object to pass prefetch instructions to
-     * @param source the data Source that is being loaded
+     * @param source      the data Source that is being loaded
      */
     public BatchingFetcher(BaseEquivalentObjectFetcher fetcher, DataTracker dataTracker,
             Source source) {
@@ -85,7 +86,8 @@ public class BatchingFetcher extends HintingFetcher
     }
 
     /**
-     * Returns an ObjectStore layered on top of the given ObjectStore, which reports to this fetcher
+     * Returns an ObjectStore layered on top of the given ObjectStore, which reports
+     * to this fetcher
      * which objects are being loaded.
      *
      * @param os an ObjectStore
@@ -114,16 +116,16 @@ public class BatchingFetcher extends HintingFetcher
         if (source == this.source) {
             Set<InterMineObject> retval = equivalents.get(obj);
             if (retval != null) {
-                //Set expected = super.queryEquivalentObjects(obj, source);
-                //if (!retval.equals(expected)) {
-                //    throw new RuntimeException("BatchingFetcher produced incorrect result."
-                //            + " Expected " + expected + ", but got " + retval);
-                //}
+                // Set expected = super.queryEquivalentObjects(obj, source);
+                // if (!retval.equals(expected)) {
+                // throw new RuntimeException("BatchingFetcher produced incorrect result."
+                // + " Expected " + expected + ", but got " + retval);
+                // }
                 return retval;
             } else {
                 cacheMisses++;
                 retval = super.queryEquivalentObjects(obj, source);
-                //equivalents.put(obj, retval);
+                // equivalents.put(obj, retval);
                 return retval;
             }
         }
@@ -139,8 +141,10 @@ public class BatchingFetcher extends HintingFetcher
     protected void getEquivalentsFor(List<ResultsRow<Object>> batch) throws ObjectStoreException {
 
         List<FastPathObject> imos = new ArrayList<FastPathObject>();
-        // TODO: add all the objects that are referenced by these objects, and follow primary keys
-        // We can make use of the ObjectStoreFastCollectionsForTranslatorImpl's ability to work this
+        // TODO: add all the objects that are referenced by these objects, and follow
+        // primary keys
+        // We can make use of the ObjectStoreFastCollectionsForTranslatorImpl's ability
+        // to work this
         // all out for us.
         for (ResultsRow<Object> row : batch) {
             for (Object object : row) {
@@ -169,8 +173,10 @@ public class BatchingFetcher extends HintingFetcher
             savedDatabaseEmpty++;
             return;
         }
-        // TODO: add all the objects that are referenced by these objects, and follow primary keys
-        // We can make use of the ObjectStoreFastCollectionsForTranslatorImpl's ability to work this
+        // TODO: add all the objects that are referenced by these objects, and follow
+        // primary keys
+        // We can make use of the ObjectStoreFastCollectionsForTranslatorImpl's ability
+        // to work this
         // all out for us.
         Set<InterMineObject> objects = new HashSet<InterMineObject>();
         for (FastPathObject fpo : fpos) {
@@ -204,16 +210,13 @@ public class BatchingFetcher extends HintingFetcher
 
         objects.removeAll(equivalents.keySet());
         // Now objects contains all the objects we need to fetch data for.
-        Map<InterMineObject, Set<InterMineObject>> results = new HashMap<InterMineObject,
-            Set<InterMineObject>>();
+        Map<InterMineObject, Set<InterMineObject>> results = new HashMap<InterMineObject, Set<InterMineObject>>();
         for (InterMineObject object : objects) {
             results.put(object, Collections.synchronizedSet(new HashSet<InterMineObject>()));
         }
 
-        Map<PrimaryKey, ClassDescriptor> pksToDo
-            = new IdentityHashMap<PrimaryKey, ClassDescriptor>();
-        Map<ClassDescriptor, List<InterMineObject>> cldToObjectsForCld
-            = new IdentityHashMap<ClassDescriptor, List<InterMineObject>>();
+        Map<PrimaryKey, ClassDescriptor> pksToDo = new IdentityHashMap<PrimaryKey, ClassDescriptor>();
+        Map<ClassDescriptor, List<InterMineObject>> cldToObjectsForCld = new IdentityHashMap<ClassDescriptor, List<InterMineObject>>();
         Map<Class<?>, List<InterMineObject>> categorised = CollectionUtil.groupByClass(objects,
                 false);
         Map<ClassDescriptor, Boolean> cldsDone = new IdentityHashMap<ClassDescriptor, Boolean>();
@@ -237,10 +240,9 @@ public class BatchingFetcher extends HintingFetcher
                             savedTimes.put(className, new Long(System.currentTimeMillis() - time));
                         }
                         if (!classNotExists) {
-                            //LOG.error("Inspecting class " + className);
+                            // LOG.error("Inspecting class " + className);
                             List<InterMineObject> objectsForCld = new ArrayList<InterMineObject>();
-                            for (Map.Entry<Class<?>, List<InterMineObject>> category
-                                    : categorised.entrySet()) {
+                            for (Map.Entry<Class<?>, List<InterMineObject>> category : categorised.entrySet()) {
                                 if (cld.getType().isAssignableFrom(category.getKey())) {
                                     objectsForCld.addAll(category.getValue());
                                 }
@@ -248,11 +250,11 @@ public class BatchingFetcher extends HintingFetcher
                             cldToObjectsForCld.put(cld, objectsForCld);
                             // So now we have a list of objects for this CLD.
                             for (PrimaryKey pk : keysForClass) {
-                                //LOG.error("Adding pk " + cld.getName() + "." + pk.getName());
+                                // LOG.error("Adding pk " + cld.getName() + "." + pk.getName());
                                 pksToDo.put(pk, cld);
                             }
                         } else {
-                            //LOG.error("Empty class " + className);
+                            // LOG.error("Empty class " + className);
                         }
                     }
                 }
@@ -266,10 +268,11 @@ public class BatchingFetcher extends HintingFetcher
     /**
      * Fetches data for the given primary keys.
      *
-     * @param pksToDo a Map of the primary keys to fetch
-     * @param results a Map to hold results that are to be added to the cache
+     * @param pksToDo            a Map of the primary keys to fetch
+     * @param results            a Map to hold results that are to be added to the
+     *                           cache
      * @param cldToObjectsForCld a Map of Lists of objects relevant to PrimaryKeys
-     * @param time1 the time that processing started
+     * @param time1              the time that processing started
      * @throws ObjectStoreException if something goes wrong
      */
     protected void doPks(Map<PrimaryKey, ClassDescriptor> pksToDo,
@@ -277,8 +280,7 @@ public class BatchingFetcher extends HintingFetcher
             Map<ClassDescriptor, List<InterMineObject>> cldToObjectsForCld,
             long time1) throws ObjectStoreException {
         Set<Integer> fetchedObjectIds = Collections.synchronizedSet(new HashSet<Integer>());
-        Map<PrimaryKey, ClassDescriptor> pksNotDone
-            = new IdentityHashMap<PrimaryKey, ClassDescriptor>(pksToDo);
+        Map<PrimaryKey, ClassDescriptor> pksNotDone = new IdentityHashMap<PrimaryKey, ClassDescriptor>(pksToDo);
         while (!pksToDo.isEmpty()) {
             int startPksToDoSize = pksToDo.size();
             Iterator<PrimaryKey> pkIter = pksToDo.keySet().iterator();
@@ -286,13 +288,13 @@ public class BatchingFetcher extends HintingFetcher
                 PrimaryKey pk = pkIter.next();
                 ClassDescriptor cld = pksToDo.get(pk);
                 if (canDoPkNow(pk, cld, pksNotDone)) {
-                    //LOG.error("Running pk " + cld.getName() + "." + pk.getName());
+                    // LOG.error("Running pk " + cld.getName() + "." + pk.getName());
                     doPk(pk, cld, results, cldToObjectsForCld.get(cld),
                             fetchedObjectIds);
                     pkIter.remove();
                     pksNotDone.remove(pk);
                 } else {
-                    //LOG.error("Cannot do pk " + cld.getName() + "." + pk.getName() + " yet");
+                    // LOG.error("Cannot do pk " + cld.getName() + "." + pk.getName() + " yet");
                 }
             }
             if (pksToDo.size() == startPksToDoSize) {
@@ -309,8 +311,8 @@ public class BatchingFetcher extends HintingFetcher
     /**
      * Returns whether this primary key can be fetched now.
      *
-     * @param pk the PrimaryKey
-     * @param cld the ClassDescriptor that the PrimaryKey is in
+     * @param pk         the PrimaryKey
+     * @param cld        the ClassDescriptor that the PrimaryKey is in
      * @param pksNotDone a Map of pks not yet fetched
      * @return a boolean
      */
@@ -326,7 +328,7 @@ public class BatchingFetcher extends HintingFetcher
                 while (otherCldIter.hasNext() && canDoPkNow) {
                     ClassDescriptor otherCld = otherCldIter.next();
                     Class<? extends FastPathObject> fieldClass = ((ReferenceDescriptor) fd)
-                        .getReferencedClassDescriptor().getType();
+                            .getReferencedClassDescriptor().getType();
                     if (otherCld.getType().isAssignableFrom(fieldClass)
                             || fieldClass.isAssignableFrom(otherCld.getType())) {
                         canDoPkNow = false;
@@ -340,16 +342,18 @@ public class BatchingFetcher extends HintingFetcher
     /**
      * Fetches equivalent objects for a particular primary key.
      *
-     * @param pk the PrimaryKey
-     * @param cld the ClassDescriptor of the PrimaryKey
-     * @param results a Map to hold results that are to be added to the cache
-     * @param objectsForCld a List of objects relevant to this PrimaryKey
-     * @param fetchedObjectIds a Set to hold ids of objects that are fetched, to prefetch from the
-     * data tracker later
+     * @param pk               the PrimaryKey
+     * @param cld              the ClassDescriptor of the PrimaryKey
+     * @param results          a Map to hold results that are to be added to the
+     *                         cache
+     * @param objectsForCld    a List of objects relevant to this PrimaryKey
+     * @param fetchedObjectIds a Set to hold ids of objects that are fetched, to
+     *                         prefetch from the
+     *                         data tracker later
      * @throws ObjectStoreException if something goes wrong
      */
-    protected void doPk(PrimaryKey pk, ClassDescriptor cld, Map<InterMineObject,
-            Set<InterMineObject>> results, List<InterMineObject> objectsForCld,
+    protected void doPk(PrimaryKey pk, ClassDescriptor cld, Map<InterMineObject, Set<InterMineObject>> results,
+            List<InterMineObject> objectsForCld,
             Set<Integer> fetchedObjectIds) throws ObjectStoreException {
         Iterator<InterMineObject> objectsForCldIter = objectsForCld.iterator();
         while (objectsForCldIter.hasNext()) {
@@ -362,30 +366,33 @@ public class BatchingFetcher extends HintingFetcher
             ConstraintSet cs = new ConstraintSet(ConstraintOp.AND);
             q.setConstraint(cs);
             Map<String, Set<Object>> fieldNameToValues = new HashMap<String, Set<Object>>();
+            // Fields where null is a value (cannot add it in fieldNameToValues, see further
+            // down below)
+            Set<String> nullableFieldNames = new HashSet<String>();
+
             for (String fieldName : pk.getFieldNames()) {
                 try {
-                    QueryField qf = new QueryField(qc, fieldName);
-                    q.addToSelect(qf);
+                    // QueryField qf = new QueryField(qc, fieldName);
+                    // q.addToSelect(qf);
                     Set<Object> values = new HashSet<Object>();
                     fieldNameToValues.put(fieldName, values);
-                    cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, values));
+                    // cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, values));
                 } catch (IllegalArgumentException e) {
-                    QueryForeignKey qf = new QueryForeignKey(qc, fieldName);
-                    q.addToSelect(qf);
+                    // QueryForeignKey qf = new QueryForeignKey(qc, fieldName);
+                    // q.addToSelect(qf);
                     Set<Object> values = new HashSet<Object>();
                     fieldNameToValues.put(fieldName, values);
-                    cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, values));
+                    // cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, values));
                 }
             }
+
             // Now make a map from the primary key values to source objects
-            Map<List<Object>, InterMineObject> keysToSourceObjects =
-                new HashMap<List<Object>, InterMineObject>();
+            Map<List<Object>, InterMineObject> keysToSourceObjects = new HashMap<List<Object>, InterMineObject>();
             while (objectsForCldIter.hasNext() && (objCount < 500)) {
                 InterMineObject object = objectsForCldIter.next();
                 origObjCount++;
                 try {
-                    if (DataLoaderHelper.objectPrimaryKeyNotNull(model, object, cld, pk, source,
-                                idMap)) {
+                    if (DataLoaderHelper.objectPrimaryKeyNotNull(model, object, cld, pk, source, idMap)) {
                         List<Collection<Object>> values = new ArrayList<Collection<Object>>();
                         boolean skipObject = false;
                         Map<String, Set<Object>> fieldsValues = new HashMap<String, Set<Object>>();
@@ -422,7 +429,7 @@ public class BatchingFetcher extends HintingFetcher
                                             .getType()) + "." + fieldName;
                                     if (!savedTimes.containsKey(summaryName)) {
                                         savedTimes.put(summaryName, new Long(System
-                                                    .currentTimeMillis() - time));
+                                                .currentTimeMillis() - time));
                                         savedCounts.put(summaryName, new Integer(0));
                                     }
                                     if (pkQueryFruitless) {
@@ -436,8 +443,13 @@ public class BatchingFetcher extends HintingFetcher
                         if (!skipObject) {
                             objCount++;
                             for (String fieldName : pk.getFieldNames()) {
-                                fieldNameToValues.get(fieldName).addAll(fieldsValues
-                                        .get(fieldName));
+                                for (Object fv : fieldsValues.get(fieldName)) {
+                                    if (fv != null) {
+                                        fieldNameToValues.get(fieldName).add(fv);
+                                    } else {
+                                        nullableFieldNames.add(fieldName);
+                                    }
+                                }
                             }
                             for (List<Object> valueSet : CollectionUtil
                                     .fanOutCombinations(values)) {
@@ -453,28 +465,66 @@ public class BatchingFetcher extends HintingFetcher
                     throw new ObjectStoreException(e);
                 }
             }
+
             // Prune BagConstraints using the hints system.
-            //boolean emptyQuery = false;
-            //Iterator<String> fieldNameIter = pk.getFieldNames().iterator();
-            //while (fieldNameIter.hasNext() && (!emptyQuery)) {
-            //    String fieldName = fieldNameIter.next();
-            //    Set values = fieldNameToValues.get(fieldName);
-                //Iterator valueIter = values.iterator();
-                //while (valueIter.hasNext()) {
-                //    if (hints.pkQueryFruitless(cld.getType(), fieldName, valueIter.next())) {
-                //        valueIter.remove();
-                //    }
-                //}
-            //    if (values.isEmpty()) {
-            //        emptyQuery = true;
-            //    }
-            //}
+            // boolean emptyQuery = false;
+            // Iterator<String> fieldNameIter = pk.getFieldNames().iterator();
+            // while (fieldNameIter.hasNext() && (!emptyQuery)) {
+            // String fieldName = fieldNameIter.next();
+            // Set values = fieldNameToValues.get(fieldName);
+            // Iterator valueIter = values.iterator();
+            // while (valueIter.hasNext()) {
+            // if (hints.pkQueryFruitless(cld.getType(), fieldName, valueIter.next())) {
+            // valueIter.remove();
+            // }
+            // }
+            // if (values.isEmpty()) {
+            // emptyQuery = true;
+            // }
+            // }
+
+            // Constructing DB query
+            // "IN" check in SQL does not work with null values, so if a pk field can be
+            // null, We have to check for "IN values OR IS NULL"
+            for (String fieldName : pk.getFieldNames()) {
+                try {
+                    QueryField qf = new QueryField(qc, fieldName);
+                    if (nullableFieldNames.contains(fieldName)) {
+                        ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
+
+                        csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
+                        q.addToSelect(qf);
+                        csOr.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+
+                        cs.addConstraint(csOr);
+                    } else {
+                        q.addToSelect(qf);
+                        cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                    }
+                } catch (IllegalArgumentException e) {
+                    QueryForeignKey qf = new QueryForeignKey(qc, fieldName);
+                    if (nullableFieldNames.contains(fieldName)) {
+                        ConstraintSet csOr = new ConstraintSet(ConstraintOp.OR);
+
+                        csOr.addConstraint(new SimpleConstraint(qf, ConstraintOp.IS_NULL));
+                        q.addToSelect(qf);
+                        csOr.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+
+                        cs.addConstraint(csOr);
+                    } else {
+                        q.addToSelect(qf);
+                        cs.addConstraint(new BagConstraint(qf, ConstraintOp.IN, fieldNameToValues.get(fieldName)));
+                    }
+                }
+            }
+
             if (objCount > 0) {
                 // Iterate through query, and add objects to results
-                //long time = System.currentTimeMillis();
+                // long time = System.currentTimeMillis();
                 int matches = 0;
                 Results res = lookupOs.execute(q, 2000, false, false, false);
-                @SuppressWarnings("unchecked") List<ResultsRow<Object>> tmpRes = (List) res;
+                @SuppressWarnings("unchecked")
+                List<ResultsRow<Object>> tmpRes = (List) res;
                 for (ResultsRow<Object> row : tmpRes) {
                     List<Object> values = new ArrayList<Object>();
                     for (int i = 1; i <= pk.getFieldNames().size(); i++) {
@@ -487,15 +537,14 @@ public class BatchingFetcher extends HintingFetcher
                     }
                     fetchedObjectIds.add(((InterMineObject) row.get(0)).getId());
                 }
-                //LOG.info("Fetched " + res.size() + " equivalent objects for " + objCount
-                //        + " objects in " + (System.currentTimeMillis() - time) + " ms for "
-                //        + cld.getName() + "." + pk.getName());
+                // LOG.info("Fetched " + res.size() + " equivalent objects for " + objCount
+                // + " objects in " + (System.currentTimeMillis() - time) + " ms for "
+                // + cld.getName() + "." + pk.getName());
             }
         }
     }
 
-    private class NoseyObjectStore extends ObjectStorePassthruImpl implements Shutdownable
-    {
+    private class NoseyObjectStore extends ObjectStorePassthruImpl implements Shutdownable {
         public NoseyObjectStore(ObjectStore os) {
             super(os);
             ShutdownHook.registerObject(this);
@@ -585,4 +634,3 @@ public class BatchingFetcher extends HintingFetcher
         }
     }
 }
-
