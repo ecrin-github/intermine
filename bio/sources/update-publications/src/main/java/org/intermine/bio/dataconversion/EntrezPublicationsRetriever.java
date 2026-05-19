@@ -217,15 +217,17 @@ public class EntrezPublicationsRetriever
                         Map<String, Map<String, Object>> fromServerMap = null;
 
                         for (int i = 0; i < MAX_TRIES; i++) {
-                            BufferedReader br = new BufferedReader(getReader(thisBatch));
-                            StringBuffer buf = new StringBuffer();
-                            String line;
-                            while ((line = br.readLine()) != null) {
-                                buf.append(line + "\n");
-                            }
-                            fromServerMap = new HashMap<String, Map<String, Object>>();
                             Throwable throwable = null;
+                            StringBuffer buf = new StringBuffer();
+                            fromServerMap = new HashMap<String, Map<String, Object>>();
                             try {
+                                // Getting data from entrez POST request
+                                BufferedReader br = new BufferedReader(getReader(thisBatch));
+                                String line;
+                                while ((line = br.readLine()) != null) {
+                                    buf.append(line + "\n");
+                                }
+
                                 if (loadFullRecord) {
                                     SAXParser.parse(new InputSource(
                                                     new StringReader(buf.toString())),
