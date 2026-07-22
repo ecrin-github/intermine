@@ -20,24 +20,25 @@ import org.apache.log4j.Logger;
  * A wrapper class to provide IdResolver service.
  * Notes:
  * 1. user can configure which resolver they want to use in a properties file?
- *    e.g. NCBI and flybase both can resolver fly genes, set priority?
+ * e.g. NCBI and flybase both can resolver fly genes, set priority?
  * 2. resolver reads specific data format, the code is depended on data file. It
- *    need to reach to a consensus with MODs. In IdResolverFactory, the method
- *    createFromFile will do the parsing. One way to generalise the process is
- *    to configure in a properties file to let the class know the identifier
- *    information by column. e.g. type=tab, column.0=mainId, etc.
+ * need to reach to a consensus with MODs. In IdResolverFactory, the method
+ * createFromFile will do the parsing. One way to generalise the process is
+ * to configure in a properties file to let the class know the identifier
+ * information by column. e.g. type=tab, column.0=mainId, etc.
  * 3. any instance of resolver should be caching during build
- * 4. data sync issue: NCBI entrez info might be out of sync with other MOD datasets
+ * 4. data sync issue: NCBI entrez info might be out of sync with other MOD
+ * datasets
  * 5. how to add new resolver? By reflection?
  *
  * Notes:
- * Unit tests: as all methods in this class are wrappers, it isn't worth writing tests if those
- *             wrapped methods are tested.
+ * Unit tests: as all methods in this class are wrappers, it isn't worth writing
+ * tests if those
+ * wrapped methods are tested.
  *
  * @author Fengyuan Hu
  */
-public final class IdResolverService
-{
+public final class IdResolverService {
     protected static final Logger LOG = Logger.getLogger(IdResolverService.class);
 
     private IdResolverService() {
@@ -45,6 +46,7 @@ public final class IdResolverService
 
     /**
      * Create a Entrez Gene Id Resolver by given taxonId
+     * 
      * @param taxonId taxon id as a string
      * @return an IdResolver
      */
@@ -54,6 +56,7 @@ public final class IdResolverService
 
     /**
      * Create a Entrez Gene Id Resolver by given taxonId set
+     * 
      * @param taxonIds set of taxon ids
      * @return an IdResolver
      */
@@ -92,7 +95,8 @@ public final class IdResolverService
 
     /**
      * Create a Entrez Gene Id Resolver by given taxonId
-     * @param taxonId taxon id as a string
+     * 
+     * @param taxonId     taxon id as a string
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -102,7 +106,8 @@ public final class IdResolverService
 
     /**
      * Create a Entrez Gene Id Resolver by given taxonId set
-     * @param taxonIds a set of taxon ids
+     * 
+     * @param taxonIds    a set of taxon ids
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -111,7 +116,18 @@ public final class IdResolverService
     }
 
     /**
+     * Create a clinical trial id resolver
+     * 
+     * @param clsName "Study"
+     * @return an IdResolver
+     */
+    public static IdResolver getClinicalTrialIdResolver(String clsName) {
+        return new ClinicalTrialIdResolverFactory(clsName).getIdResolver(true);
+    }
+
+    /**
      * Create a fly id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getFlyIdResolver() {
@@ -120,6 +136,7 @@ public final class IdResolverService
 
     /**
      * Create a fly id resolver
+     * 
      * @param clsName SO term
      * @return an IdResolver
      */
@@ -129,6 +146,7 @@ public final class IdResolverService
 
     /**
      * Create a fly id resolver
+     * 
      * @param clsCol SO term collection
      * @return an IdResolver
      */
@@ -138,7 +156,8 @@ public final class IdResolverService
 
     /**
      * Create a fly id resolver
-     * @param clsName SO term
+     * 
+     * @param clsName     SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -148,7 +167,8 @@ public final class IdResolverService
 
     /**
      * Create a fly id resolver
-     * @param clsCol SO term collection
+     * 
+     * @param clsCol      SO term collection
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -158,6 +178,7 @@ public final class IdResolverService
 
     /**
      * Create a worm id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getWormIdResolver() {
@@ -166,6 +187,7 @@ public final class IdResolverService
 
     /**
      * Create a worm id resolver
+     * 
      * @param clsName SO term
      * @return an IdResolver
      */
@@ -175,7 +197,8 @@ public final class IdResolverService
 
     /**
      * Create a worm id resolver
-     * @param clsName SO term
+     * 
+     * @param clsName     SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -185,6 +208,7 @@ public final class IdResolverService
 
     /**
      * Create a fish id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getFishIdResolver() {
@@ -193,6 +217,7 @@ public final class IdResolverService
 
     /**
      * Create a fish id resolver
+     * 
      * @param clsName SO term
      * @return an IdResolver
      */
@@ -202,7 +227,8 @@ public final class IdResolverService
 
     /**
      * Create a fish id resolver
-     * @param clsName SO term
+     * 
+     * @param clsName     SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -212,6 +238,7 @@ public final class IdResolverService
 
     /**
      * Create a Human gene id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getHumanIdResolver() {
@@ -220,6 +247,7 @@ public final class IdResolverService
 
     /**
      * Create a Human gene resolver
+     * 
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -229,6 +257,7 @@ public final class IdResolverService
 
     /**
      * Create a mouse id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getMouseIdResolver() {
@@ -237,6 +266,7 @@ public final class IdResolverService
 
     /**
      * Create a mouse id resolver
+     * 
      * @param clsName SO term
      * @return a IdResolver
      */
@@ -246,7 +276,8 @@ public final class IdResolverService
 
     /**
      * Create a mouse id resolver
-     * @param clsName SO term
+     * 
+     * @param clsName     SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -256,6 +287,7 @@ public final class IdResolverService
 
     /**
      * Create a rat id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getRatIdResolver() {
@@ -264,6 +296,7 @@ public final class IdResolverService
 
     /**
      * Create a rat id resolver
+     * 
      * @param clsName SO term
      * @return an IdResolver
      */
@@ -273,7 +306,8 @@ public final class IdResolverService
 
     /**
      * Create a rat id resolver
-     * @param clsName SO term
+     * 
+     * @param clsName     SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -283,6 +317,7 @@ public final class IdResolverService
 
     /**
      * Create a HGNC human gene id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getHgncIdResolver() {
@@ -291,6 +326,7 @@ public final class IdResolverService
 
     /**
      * Create a HGNC human gene resolver
+     * 
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -300,6 +336,7 @@ public final class IdResolverService
 
     /**
      * Create a Ensembl gene id resolver
+     * 
      * @return an IdResolver
      */
     public static IdResolver getEnsemblIdResolver() {
@@ -308,6 +345,7 @@ public final class IdResolverService
 
     /**
      * Create a Ensembl gene resolver
+     * 
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -317,6 +355,7 @@ public final class IdResolverService
 
     /**
      * Create a GO id resolver
+     * 
      * @param ontology SO term
      * @return an IdResolver
      */
@@ -326,7 +365,8 @@ public final class IdResolverService
 
     /**
      * Create a GO id resolver
-     * @param ontology SO term
+     * 
+     * @param ontology    SO term
      * @param failOnError if false swallow any exceptions and return null
      * @return an IdResolver
      */
@@ -336,6 +376,7 @@ public final class IdResolverService
 
     /**
      * Create a mock id resolver for unit test
+     * 
      * @param clsName SO term
      * @return an IdResolver
      */
