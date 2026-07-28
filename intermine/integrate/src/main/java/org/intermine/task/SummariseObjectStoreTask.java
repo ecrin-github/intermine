@@ -28,21 +28,24 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.filters.StringInputStream;
 
-
 /**
- * Summarise an ObjectStore into a particular properties file.  The summary contains:
- * <p> counts of the number of objects of each class
- * <p> for class fields that have a small number of value, a list of those values.
+ * Summarise an ObjectStore into a particular properties file. The summary
+ * contains:
+ * <p>
+ * counts of the number of objects of each class
+ * <p>
+ * for class fields that have a small number of value, a list of those values.
+ * 
  * @author Kim Rutherford
  */
 
-public class SummariseObjectStoreTask extends Task
-{
+public class SummariseObjectStoreTask extends Task {
     protected String alias, configFileName;
     protected File outputFile;
 
     /**
      * Set the ObjectStore alias
+     * 
      * @param alias the ObjectStore alias
      */
     public void setAlias(String alias) {
@@ -50,8 +53,10 @@ public class SummariseObjectStoreTask extends Task
     }
 
     /**
-     * Set the name of the Properties file containing the names of the classes and fields to
+     * Set the name of the Properties file containing the names of the classes and
+     * fields to
      * summarise.
+     * 
      * @param configFileName the properties file name
      */
     public void setConfigFileName(String configFileName) {
@@ -60,6 +65,7 @@ public class SummariseObjectStoreTask extends Task
 
     /**
      * Set the name of the file to write the summary into
+     * 
      * @param outputFile the output file
      */
     public void setOutputFile(File outputFile) {
@@ -74,8 +80,7 @@ public class SummariseObjectStoreTask extends Task
             ObjectStore os = ObjectStoreFactory.getObjectStore(alias);
             if (os instanceof ObjectStoreInterMineImpl) {
                 Database db = ((ObjectStoreInterMineImpl) os).getDatabase();
-                String objectSummaryString =
-                    MetadataManager.retrieve(db, MetadataManager.OS_SUMMARY);
+                String objectSummaryString = MetadataManager.retrieve(db, MetadataManager.OS_SUMMARY);
 
                 ObjectStoreSummary oss;
 
@@ -88,29 +93,29 @@ public class SummariseObjectStoreTask extends Task
                     }
                     Properties config = new Properties();
                     config.load(configStream);
-                    System.out .println("summarising objectstore...");
+                    System.out.println("summarising objectstore...");
                     oss = new ObjectStoreSummary(os, config);
                     MetadataManager.store(db, MetadataManager.OS_SUMMARY,
-                                          PropertiesUtil.serialize(oss.toProperties()));
+                            PropertiesUtil.serialize(oss.toProperties()));
 
                 } else {
                     Properties objectStoreSummaryProperties = new Properties();
-                    InputStream objectStoreSummaryPropertiesStream =
-                        new StringInputStream(objectSummaryString);
+                    InputStream objectStoreSummaryPropertiesStream = new StringInputStream(objectSummaryString);
 
                     objectStoreSummaryProperties.load(objectStoreSummaryPropertiesStream);
                     oss = new ObjectStoreSummary(objectStoreSummaryProperties);
                 }
 
                 String header = "Automatically generated for " + alias + " using config "
-                    + configFileName;
+                        + configFileName;
                 oss.toProperties().store(new FileOutputStream(outputFile), header);
 
             } else {
                 throw new RuntimeException("can't read summary from " + alias
-                                           + " - not an instance of ObjectStoreInterMineImpl");
+                        + " - not an instance of ObjectStoreInterMineImpl");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new BuildException("failed to get the object store summary", e);
         }
     }
