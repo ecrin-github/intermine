@@ -32,6 +32,7 @@ import org.intermine.objectstore.ObjectStoreWriter;
  */
 public class CreateAttributeIndexesProcess extends PostProcessor
 {
+    // private boolean attributeIndexes;
 
     /**
      * Create a new instance
@@ -41,6 +42,16 @@ public class CreateAttributeIndexesProcess extends PostProcessor
     public CreateAttributeIndexesProcess(ObjectStoreWriter osw) {
         super(osw);
     }
+
+    // /**
+    //  * Set the attributeIndexes flag.  Index the attributes that are not part of the
+    //  * primary key if and only if the flag is set.
+    //  *
+    //  * @param attributeIndexes flag for attribute indexes
+    //  */
+    // public void setAttributeIndexes(boolean attributeIndexes) {
+    //     this.attributeIndexes = attributeIndexes;
+    // }
 
     /**
      * {@inheritDoc}
@@ -52,6 +63,7 @@ public class CreateAttributeIndexesProcess extends PostProcessor
     public void postProcess() throws ObjectStoreException {
         CreateIndexesTask cit = new CreateIndexesTask();
         cit.setAttributeIndexes(true);
+        // cit.setAttributeIndexes(this.attributeIndexes);
         cit.setObjectStore(osw.getObjectStore());
         cit.execute();
     }
