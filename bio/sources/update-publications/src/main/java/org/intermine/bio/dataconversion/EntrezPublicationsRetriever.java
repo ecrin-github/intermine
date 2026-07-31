@@ -93,6 +93,7 @@ public class EntrezPublicationsRetriever
     private boolean loadFullRecord = false;
     private Map<String, Item> meshTerms = new HashMap<String, Item>();
     private static final int POSTGRES_INDEX_SIZE = 2704;    // Max size was reduced in Postgres 12
+    private static final int ABSTRACT_TEXT_MAX_SIZE = POSTGRES_INDEX_SIZE - 300;    // Avoiding index size errors
 
     /**
      * Load summary version of Publication record by default. If this boolean (loadFullRecord)
@@ -417,10 +418,10 @@ public class EntrezPublicationsRetriever
         final String abstractText = (String) map.get("abstractText");
         if (!StringUtils.isEmpty(abstractText)) {
             // see https://github.com/intermine/intermine/issues/2009
-            if (abstractText.length() > POSTGRES_INDEX_SIZE) {
+            if (abstractText.length() > ABSTRACT_TEXT_MAX_SIZE) {
                 String ellipses = "...";
                 String choppedAbstract = abstractText.substring(
-                        0, POSTGRES_INDEX_SIZE - ellipses.length());
+                        0, ABSTRACT_TEXT_MAX_SIZE - ellipses.length());
                 publication.setAttribute("abstractText", choppedAbstract + ellipses);
             } else {
                 publication.setAttribute("abstractText", abstractText);
@@ -601,10 +602,10 @@ public class EntrezPublicationsRetriever
 
                 // see https://github.com/intermine/intermine/issues/2009
                 // TOOD: refactor with code in mapToItems
-                if (abstractText.length() > POSTGRES_INDEX_SIZE) {
+                if (abstractText.length() > ABSTRACT_TEXT_MAX_SIZE) {
                     String ellipses = "...";
                     String choppedAbstract = abstractText.substring(
-                            0, POSTGRES_INDEX_SIZE - ellipses.length());
+                            0, ABSTRACT_TEXT_MAX_SIZE - ellipses.length());
                     abstractText = choppedAbstract + ellipses;
                     // System.out.println("abstractText3: " + abstractText.length());
                 }
