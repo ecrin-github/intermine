@@ -46,8 +46,7 @@ import org.intermine.metadata.Util;
  *
  * @author Matthew Wakeling
  */
-public class PathQuery implements Cloneable
-{
+public class PathQuery implements Cloneable {
     /** A Pattern that finds spaces in a String. */
     protected static final Pattern SPACE_SPLITTER = Pattern.compile(" ", Pattern.LITERAL);
     /**
@@ -55,10 +54,10 @@ public class PathQuery implements Cloneable
      * This should be incremented each time the PathQuery serialisation
      * format changes.
      * <dl>
-     *   <dt>2</dt>
-     *   <dd>Changed PathQuery format.</dd>
-     *   <dt>1</dt>
-     *   <dd>Original format.</dd>
+     * <dt>2</dt>
+     * <dd>Changed PathQuery format.</dd>
+     * <dt>1</dt>
+     * <dd>Original format.</dd>
      * </dl>
      **/
     public static final int USERPROFILE_VERSION = 2;
@@ -77,8 +76,7 @@ public class PathQuery implements Cloneable
     private List<OrderElement> orderBy = new ArrayList<OrderElement>();
     private Map<PathConstraint, String> constraints = new LinkedHashMap<PathConstraint, String>();
     private LogicExpression logic = null;
-    private Map<String, OuterJoinStatus> outerJoinStatus
-        = new LinkedHashMap<String, OuterJoinStatus>();
+    private Map<String, OuterJoinStatus> outerJoinStatus = new LinkedHashMap<String, OuterJoinStatus>();
     private Map<String, String> descriptions = new LinkedHashMap<String, String>();
     private String description = null;
 
@@ -89,17 +87,26 @@ public class PathQuery implements Cloneable
     private boolean isVerified = false;
     /** The root path of this query */
     private String rootClass = null;
-    /** A Map from path to class name for all PathConstraintSubclass objects in the query. */
+    /**
+     * A Map from path to class name for all PathConstraintSubclass objects in the
+     * query.
+     */
     private Map<String, String> subclasses = null;
     /** A Map from path to outer join group for all main paths in the query. */
     private Map<String, String> outerJoinGroups = null;
     /** A Map from outer join group to the set of constraint codes in that group. */
     private Map<String, Set<String>> constraintGroups = null;
-    /** A Set of Strings describing all the loop constraints in the query, in order to check for
-     * uniqueness */
+    /**
+     * A Set of Strings describing all the loop constraints in the query, in order
+     * to check for
+     * uniqueness
+     */
     private Set<String> existingLoops = null;
-    /** A boolean that determines if the constraints are broken enough to not bother validating the
-     * constraint logic */
+    /**
+     * A boolean that determines if the constraints are broken enough to not bother
+     * validating the
+     * constraint logic
+     */
     private boolean doNotVerifyLogic = false;
 
     private static final String NO_VIEW_ERROR = "No columns selected for output";
@@ -116,7 +123,8 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Constructor. Takes an existing PathQuery object, and copies all the data. Similar to the
+     * Constructor. Takes an existing PathQuery object, and copies all the data.
+     * Similar to the
      * clone method.
      *
      * @param o a PathQuery to copy
@@ -146,15 +154,19 @@ public class PathQuery implements Cloneable
     // ------------- View control methods ---------------
 
     /**
-     * Add a single element to the view list. The element should be a normal path expression, with
-     * dots separating the parts. Do not use colons to represent outer joins, and do not use
-     * square brackets to represent subclass constraints. The path will not be verified until the
+     * Add a single element to the view list. The element should be a normal path
+     * expression, with
+     * dots separating the parts. Do not use colons to represent outer joins, and do
+     * not use
+     * square brackets to represent subclass constraints. The path will not be
+     * verified until the
      * verifyQuery() method is called, but will be merely checked for format.
      *
      * @param viewPath the new path String to add to the view list
-     * @throws NullPointerException if viewPath is null
-     * @throws IllegalArgumentException if the viewPath contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if viewPath is null
+     * @throws IllegalArgumentException if the viewPath contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void addView(String viewPath) {
         deVerify();
@@ -163,14 +175,19 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Removes a single element from the view list. The element should be a normal path expression,
-     * with dots separating the parts. Do not use colons to represent outer joins, and do not use
-     * square brackets to represent subclass constraints. If there are multiple copies of the path
-     * on the view list (which is an invalid query), then this method will remove all of them.
+     * Removes a single element from the view list. The element should be a normal
+     * path expression,
+     * with dots separating the parts. Do not use colons to represent outer joins,
+     * and do not use
+     * square brackets to represent subclass constraints. If there are multiple
+     * copies of the path
+     * on the view list (which is an invalid query), then this method will remove
+     * all of them.
      *
      * @param viewPath the path String to remove from the view list
-     * @throws NullPointerException if the viewPath is null
-     * @throws NoSuchElementException if the viewPath is not already on the view list
+     * @throws NullPointerException   if the viewPath is null
+     * @throws NoSuchElementException if the viewPath is not already on the view
+     *                                list
      */
     public synchronized void removeView(String viewPath) {
         deVerify();
@@ -191,18 +208,26 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the view list. The elements should be normal path expressions,
-     * with dots separating the parts. Do not use colons to represent outer joins, and do not use
-     * square brackets to represent subclass constraints. The paths will not be verified until the
-     * verifyQuery() method is called, but will merely be checked for format. The paths will be
-     * added in the order of the iterator of the collection. If there is an error with any of the
-     * elements of the collection, then none of the elements will be added and the query will be
+     * Adds a group of elements to the view list. The elements should be normal path
+     * expressions,
+     * with dots separating the parts. Do not use colons to represent outer joins,
+     * and do not use
+     * square brackets to represent subclass constraints. The paths will not be
+     * verified until the
+     * verifyQuery() method is called, but will merely be checked for format. The
+     * paths will be
+     * added in the order of the iterator of the collection. If there is an error
+     * with any of the
+     * elements of the collection, then none of the elements will be added and the
+     * query will be
      * unchanged.
      *
      * @param viewPaths a Collection of String paths to add to the view list
-     * @throws NullPointerException if viewPaths is null or contains a null element
-     * @throws IllegalArgumentException if a view path contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if viewPaths is null or contains a null
+     *                                  element
+     * @throws IllegalArgumentException if a view path contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void addViews(Collection<String> viewPaths) {
         deVerify();
@@ -224,20 +249,28 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the view list. The elements should be normal path expressions,
-     * with dots separating the parts. Do not use colons to represent outer joins, and do not use
-     * square brackets to represent subclass constraints. The paths will not be verified until the
-     * verifyQuery() method is called, but will merely be checked for format. The paths will be
-     * added in the order of the arguments (varargs or array). If there is an error with any of the
-     * elements of the array/varargs, then none of the elements will be added and the query will be
+     * Adds a group of elements to the view list. The elements should be normal path
+     * expressions,
+     * with dots separating the parts. Do not use colons to represent outer joins,
+     * and do not use
+     * square brackets to represent subclass constraints. The paths will not be
+     * verified until the
+     * verifyQuery() method is called, but will merely be checked for format. The
+     * paths will be
+     * added in the order of the arguments (varargs or array). If there is an error
+     * with any of the
+     * elements of the array/varargs, then none of the elements will be added and
+     * the query will be
      * unchanged.
      *
      * @param viewPaths String paths to add to the view list
-     * @throws NullPointerException if viewPaths is null or contains a null element
-     * @throws IllegalArgumentException if a view path contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if viewPaths is null or contains a null
+     *                                  element
+     * @throws IllegalArgumentException if a view path contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
-    public synchronized void addViews(String ... viewPaths) {
+    public synchronized void addViews(String... viewPaths) {
         deVerify();
         try {
             for (String viewPath : viewPaths) {
@@ -257,19 +290,28 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the view list, given a space-separated list. The elements should
-     * be normal path expressions, with dots separating the parts. Do not use colons to represent
-     * outer joins, and do not use square brackets to represent subclass constraints. The paths
-     * will not be verified until the verifyQuery() method is called, but will merely be checked
-     * for format. The paths will be added preserving the order in the argument. The paths should be
-     * separated by spaces in the argument, but not commas. If there is an error with any of the
-     * elements in the argument, then none of the elements will be added and the query will be
+     * Adds a group of elements to the view list, given a space-separated list. The
+     * elements should
+     * be normal path expressions, with dots separating the parts. Do not use colons
+     * to represent
+     * outer joins, and do not use square brackets to represent subclass
+     * constraints. The paths
+     * will not be verified until the verifyQuery() method is called, but will
+     * merely be checked
+     * for format. The paths will be added preserving the order in the argument. The
+     * paths should be
+     * separated by spaces in the argument, but not commas. If there is an error
+     * with any of the
+     * elements in the argument, then none of the elements will be added and the
+     * query will be
      * unchanged.
      *
      * @param viewPaths String paths to add to the view list
-     * @throws NullPointerException if viewPaths is null or contains a null element
-     * @throws IllegalArgumentException if a view path contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if viewPaths is null or contains a null
+     *                                  element
+     * @throws IllegalArgumentException if a view path contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void addViewSpaceSeparated(String viewPaths) {
         deVerify();
@@ -297,9 +339,12 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the current view list. This is an unmodifiable copy of the view list as it is at the
-     * point of execution of this method. Changes in this query are not reflected in the result of
-     * this method. The paths listed are normal path expressions without colons or square brackets.
+     * Returns the current view list. This is an unmodifiable copy of the view list
+     * as it is at the
+     * point of execution of this method. Changes in this query are not reflected in
+     * the result of
+     * this method. The paths listed are normal path expressions without colons or
+     * square brackets.
      * The paths may not have been verified.
      *
      * @return a List of String paths
@@ -311,16 +356,21 @@ public class PathQuery implements Cloneable
     // ---------------- Order By List Control -----------------
 
     /**
-     * Adds an element to the order by list of this query. The element should be a normal path
-     * expression, with dots separating the parts. Do not use colons to represent outer joins, and
-     * do not use square brackets to represent subclass constraints. The path will not be verified
-     * until the verifyQuery() method is called, but will merely be checked for format.
+     * Adds an element to the order by list of this query. The element should be a
+     * normal path
+     * expression, with dots separating the parts. Do not use colons to represent
+     * outer joins, and
+     * do not use square brackets to represent subclass constraints. The path will
+     * not be verified
+     * until the verifyQuery() method is called, but will merely be checked for
+     * format.
      *
      * @param orderPath the path expression to add to the order by list
      * @param direction the sort order
-     * @throws NullPointerException if orderPath or direction is null
-     * @throws IllegalArgumentException if the orderPath contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if orderPath or direction is null
+     * @throws IllegalArgumentException if the orderPath contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void addOrderBy(String orderPath, OrderDirection direction) {
         deVerify();
@@ -328,15 +378,20 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Removes an element from the order by list of this query. The element should be a normal path
-     * expression, with dots separating the parts. Do not use colons to represent outer joins, and
-     * do not use square brackets to represent subclass constraints. If there are multiple copies
-     * of the path on the order by list (which is an invalid query), then this method will remove
+     * Removes an element from the order by list of this query. The element should
+     * be a normal path
+     * expression, with dots separating the parts. Do not use colons to represent
+     * outer joins, and
+     * do not use square brackets to represent subclass constraints. If there are
+     * multiple copies
+     * of the path on the order by list (which is an invalid query), then this
+     * method will remove
      * all of them.
      *
      * @param orderPath the path String to remove from the order by list
-     * @throws NullPointerException if the orderPath is null
-     * @throws NoSuchElementException if the orderPath is not already in the order by list
+     * @throws NullPointerException   if the orderPath is null
+     * @throws NoSuchElementException if the orderPath is not already in the order
+     *                                by list
      */
     public synchronized void removeOrderBy(String orderPath) {
         deVerify();
@@ -366,8 +421,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds an element to the order by list of this query. The OrderElement will have already
-     * checked the path for format, and the path will not be verified until the verifyQuery()
+     * Adds an element to the order by list of this query. The OrderElement will
+     * have already
+     * checked the path for format, and the path will not be verified until the
+     * verifyQuery()
      * method is called.
      *
      * @param orderElement an OrderElement to add to the order by list
@@ -382,13 +439,18 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the order by list of this query. The elements will have already
-     * checked the paths for format, but the paths will not be verified until the verifyQuery()
-     * method is called. If there is an error with any of the elements of the collection, then none
+     * Adds a group of elements to the order by list of this query. The elements
+     * will have already
+     * checked the paths for format, but the paths will not be verified until the
+     * verifyQuery()
+     * method is called. If there is an error with any of the elements of the
+     * collection, then none
      * of the elements will be added and the query will be unchanged.
      *
-     * @param orderElements a Collection of OrderElement objects to add to the view list
-     * @throws NullPointerException if orderElements is null or contains a null element
+     * @param orderElements a Collection of OrderElement objects to add to the view
+     *                      list
+     * @throws NullPointerException if orderElements is null or contains a null
+     *                              element
      */
     public synchronized void addOrderBys(Collection<OrderElement> orderElements) {
         deVerify();
@@ -408,15 +470,20 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the order by list of this query. The elements will have already
-     * checked the paths for format, but the paths will not be verified until the verifyQuery()
-     * method is called. If there is an error with any of the elements in this array/varargs, then
+     * Adds a group of elements to the order by list of this query. The elements
+     * will have already
+     * checked the paths for format, but the paths will not be verified until the
+     * verifyQuery()
+     * method is called. If there is an error with any of the elements in this
+     * array/varargs, then
      * none of the elements will be added and the query will be unchanged.
      *
-     * @param orderElements an array/varargs of OrderElement objects to add to the view list
-     * @throws NullPointerException if orderElements is null or contains a null element
+     * @param orderElements an array/varargs of OrderElement objects to add to the
+     *                      view list
+     * @throws NullPointerException if orderElements is null or contains a null
+     *                              element
      */
-    public synchronized void addOrderBys(OrderElement ... orderElements) {
+    public synchronized void addOrderBys(OrderElement... orderElements) {
         deVerify();
         if (orderElements == null) {
             throw new NullPointerException("Cannot add null array of OrderElements to order by "
@@ -434,21 +501,33 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of elements to the order by list, given a space-separated list. The elements
-     * should be normal path expressions, with dots separating the parts. Do not use colons to
-     * represent outer joins, and do not use square brackets to represent subclass constraints. The
-     * paths will not be verified until the verifyQuery() method is called, but will merely be
-     * checked for format. The paths will be added preserving the order in the argument. Each
-     * element should be a path expression followed by a space and then either "asc" or "desc" to
-     * describe the direction of sorting, and the elements should be separated by spaces. If there
-     * is an error with any of the elements in the argument, then none of the elements will be
+     * Adds a group of elements to the order by list, given a space-separated list.
+     * The elements
+     * should be normal path expressions, with dots separating the parts. Do not use
+     * colons to
+     * represent outer joins, and do not use square brackets to represent subclass
+     * constraints. The
+     * paths will not be verified until the verifyQuery() method is called, but will
+     * merely be
+     * checked for format. The paths will be added preserving the order in the
+     * argument. Each
+     * element should be a path expression followed by a space and then either "asc"
+     * or "desc" to
+     * describe the direction of sorting, and the elements should be separated by
+     * spaces. If there
+     * is an error with any of the elements in the argument, then none of the
+     * elements will be
      * added and the query will be unchanged.
      *
      * @param orderString the order elements in space-separated string form
-     * @throws NullPointerException if orderString is null
-     * @throws IllegalArgumentException if a path expression contains colons or square brackets, or
-     * is otherwise in a bad format, or if there is not an even number of space-separated elements,
-     * or if any even-numbered element is not either "asc" or "desc".
+     * @throws NullPointerException     if orderString is null
+     * @throws IllegalArgumentException if a path expression contains colons or
+     *                                  square brackets, or
+     *                                  is otherwise in a bad format, or if there is
+     *                                  not an even number of space-separated
+     *                                  elements,
+     *                                  or if any even-numbered element is not
+     *                                  either "asc" or "desc".
      */
     public synchronized void addOrderBySpaceSeparated(String orderString) {
         deVerify();
@@ -482,10 +561,14 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the current order by list. This is an unmodifiable copy of the order by list as it is
-     * at the point of execution of this method. Changes in this query are not reflected in the
-     * result of this method. The returned value is a List containing OrderElement objects, which
-     * contain a String path expression without colons or square brackets, and an OrderDirection.
+     * Returns the current order by list. This is an unmodifiable copy of the order
+     * by list as it is
+     * at the point of execution of this method. Changes in this query are not
+     * reflected in the
+     * result of this method. The returned value is a List containing OrderElement
+     * objects, which
+     * contain a String path expression without colons or square brackets, and an
+     * OrderDirection.
      * The paths may not have been verified.
      *
      * @return a List of OrderElement objects
@@ -497,12 +580,18 @@ public class PathQuery implements Cloneable
     // ------------------ Constraint Control ------------------
 
     /**
-     * Adds a PathConstraint to this query. The PathConstraint will be attached to the path in the
-     * constraint, which will have already been checked for format (no colons or square brackets),
-     * but will not be verified until the verifyQuery() method is called. This method returns a
-     * String code which is a single character that can be used in the constraint logic to logically
-     * combine constraints. The constraint will be added to the existing constraint logic with the
-     * AND operator - for any other arrangement, set the logic after calling this method. If the
+     * Adds a PathConstraint to this query. The PathConstraint will be attached to
+     * the path in the
+     * constraint, which will have already been checked for format (no colons or
+     * square brackets),
+     * but will not be verified until the verifyQuery() method is called. This
+     * method returns a
+     * String code which is a single character that can be used in the constraint
+     * logic to logically
+     * combine constraints. The constraint will be added to the existing constraint
+     * logic with the
+     * AND operator - for any other arrangement, set the logic after calling this
+     * method. If the
      * constraint is already present in the query, then this method will do nothing.
      *
      * @param constraint the PathConstraint to add to this query
@@ -539,24 +628,37 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a PathConstraints to this query, associated with a given constraint code. The
-     * PathConstraint will be attached to the path in the constraint, which will have already been
-     * checked for format (no colons or square brackets), but will not be verified until the
-     * verifyQuery() method is called. If the given code is already in use by a different
-     * constraint, or if the constraint already has a different code, then an exception is thrown.
-     * The new constraint will be added to the existing constraint logic with the AND operator -
-     * for any other arrangement, set the logic after calling this method. If the constraint is
-     * already present in the query with the same constraint code, then this method will do nothing.
+     * Adds a PathConstraints to this query, associated with a given constraint
+     * code. The
+     * PathConstraint will be attached to the path in the constraint, which will
+     * have already been
+     * checked for format (no colons or square brackets), but will not be verified
+     * until the
+     * verifyQuery() method is called. If the given code is already in use by a
+     * different
+     * constraint, or if the constraint already has a different code, then an
+     * exception is thrown.
+     * The new constraint will be added to the existing constraint logic with the
+     * AND operator -
+     * for any other arrangement, set the logic after calling this method. If the
+     * constraint is
+     * already present in the query with the same constraint code, then this method
+     * will do nothing.
      *
      * @param constraint the PathConstraint to add to this query
-     * @param code the constraint code to associate with this constraint. This must be a
-     *             string consisting of one of the following characters "A","B","C","D","E","F","G",
-     *             "H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z".
-     * @throws NullPointerException if the constraint or the code is null
-     * @throws IllegalStateException if the constraint is already associated with a different code,
-     * or the code is already associated with a different constraint
-     * @throws IllegalArgumentException if the code is in an inappropriate format - that is, if it
-     * is not a single uppercase character
+     * @param code       the constraint code to associate with this constraint. This
+     *                   must be a
+     *                   string consisting of one of the following characters
+     *                   "A","B","C","D","E","F","G",
+     *                   "H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z".
+     * @throws NullPointerException     if the constraint or the code is null
+     * @throws IllegalStateException    if the constraint is already associated with
+     *                                  a different code,
+     *                                  or the code is already associated with a
+     *                                  different constraint
+     * @throws IllegalArgumentException if the code is in an inappropriate format -
+     *                                  that is, if it
+     *                                  is not a single uppercase character
      */
     public synchronized void addConstraint(PathConstraint constraint, String code) {
         deVerify();
@@ -599,11 +701,13 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Removes a constraint from this query. The PathConstraint should be a constraint that already
-     * exists in this query. The constraint will also be removed from the constraint logic.
+     * Removes a constraint from this query. The PathConstraint should be a
+     * constraint that already
+     * exists in this query. The constraint will also be removed from the constraint
+     * logic.
      *
      * @param constraint the PathConstraint to remove from this query
-     * @throws NullPointerException if the constraint is null
+     * @throws NullPointerException   if the constraint is null
      * @throws NoSuchElementException if the constraint is not present in the query
      */
     public synchronized void removeConstraint(PathConstraint constraint) {
@@ -626,20 +730,27 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Replaces a constraint in the query with a different, carrying over the constraint code, and
-     * preserving the constraint logic. The new PathConstraint will be attached to the path in the
-     * constraint, which will have already been checked for format (no colons or square brackets),
-     * but will not be verified until the verifyQuery() method is called. This method preserves the
-     * order of constraints - that is, the replacement will be swapped in where the old constraint
+     * Replaces a constraint in the query with a different, carrying over the
+     * constraint code, and
+     * preserving the constraint logic. The new PathConstraint will be attached to
+     * the path in the
+     * constraint, which will have already been checked for format (no colons or
+     * square brackets),
+     * but will not be verified until the verifyQuery() method is called. This
+     * method preserves the
+     * order of constraints - that is, the replacement will be swapped in where the
+     * old constraint
      * was.
      *
-     * @param old the old PathConstraint object
+     * @param old         the old PathConstraint object
      * @param replacement the new PathConstraint object to replace it
-     * @throws NullPointerException if old or replacement are null
-     * @throws NoSuchElementException if the old PathConstraint is not already in the query
-     * @throws IllegalArgumentException if the code from the old constraint is not appropriate to
-     * the replacement constraint
-     * @throws IllegalStateException if the replacement is already in the query
+     * @throws NullPointerException     if old or replacement are null
+     * @throws NoSuchElementException   if the old PathConstraint is not already in
+     *                                  the query
+     * @throws IllegalArgumentException if the code from the old constraint is not
+     *                                  appropriate to
+     *                                  the replacement constraint
+     * @throws IllegalStateException    if the replacement is already in the query
      */
     public synchronized void replaceConstraint(PathConstraint old, PathConstraint replacement) {
         deVerify();
@@ -674,7 +785,8 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Clears the entire set of constraints from this query, and resets the constraint logic.
+     * Clears the entire set of constraints from this query, and resets the
+     * constraint logic.
      */
     public synchronized void clearConstraints() {
         deVerify();
@@ -683,16 +795,23 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a collection of constraints to this query. The PathConstraints will be attached to the
-     * paths in the constraints, which will have already been checked for format (no colons or
-     * square brackets), but will not be verified until the verifyQuery() method is called. The
-     * constraints will all be given codes, and added to the constraint logic with the default AND
-     * operator. To discover the codes, use the getConstraints() method. If there is an error with
-     * any of the elements in the collection, then none of the elements will be added and the
+     * Adds a collection of constraints to this query. The PathConstraints will be
+     * attached to the
+     * paths in the constraints, which will have already been checked for format (no
+     * colons or
+     * square brackets), but will not be verified until the verifyQuery() method is
+     * called. The
+     * constraints will all be given codes, and added to the constraint logic with
+     * the default AND
+     * operator. To discover the codes, use the getConstraints() method. If there is
+     * an error with
+     * any of the elements in the collection, then none of the elements will be
+     * added and the
      * query will be unchanged.
      *
      * @param constraintList the PathConstraint objects to add to this query
-     * @throws NullPointerException if constraints is null, or if it contains a null element
+     * @throws NullPointerException if constraints is null, or if it contains a null
+     *                              element
      */
     public synchronized void addConstraints(Collection<PathConstraint> constraintList) {
         deVerify();
@@ -712,18 +831,25 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds a group of constraints to this query. The PathConstraints will be attached to the paths
-     * in the constraints, which will have already been checked for format (no colons or square
-     * brackets), but will not be verified until the verifyQuery() method is called. The constraints
-     * will all be given codes, and added to the constraint logic with the default AND operator. To
-     * discover the codes, use the getConstraints() method. If there is an error with any of the
-     * elements in the array/varargs, then none of the elements will be added and the query will be
+     * Adds a group of constraints to this query. The PathConstraints will be
+     * attached to the paths
+     * in the constraints, which will have already been checked for format (no
+     * colons or square
+     * brackets), but will not be verified until the verifyQuery() method is called.
+     * The constraints
+     * will all be given codes, and added to the constraint logic with the default
+     * AND operator. To
+     * discover the codes, use the getConstraints() method. If there is an error
+     * with any of the
+     * elements in the array/varargs, then none of the elements will be added and
+     * the query will be
      * unchanged.
      *
      * @param constraintList the PathConstraint objects to add to this query
-     * @throws NullPointerException if constraints is null, or if it contains a null element
+     * @throws NullPointerException if constraints is null, or if it contains a null
+     *                              element
      */
-    public synchronized void addConstraints(PathConstraint ... constraintList) {
+    public synchronized void addConstraints(PathConstraint... constraintList) {
         deVerify();
         if (constraintList == null) {
             throw new NullPointerException("Cannot add null array of PathConstraints to this "
@@ -741,12 +867,16 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns a Map of all the constraints in this query, from PathConstraint to the constraint
-     * code used in the constraint logic. This returns an unmodifiable copy of the data in the
-     * query at the moment this method is executed, so further changes to the query are not
+     * Returns a Map of all the constraints in this query, from PathConstraint to
+     * the constraint
+     * code used in the constraint logic. This returns an unmodifiable copy of the
+     * data in the
+     * query at the moment this method is executed, so further changes to the query
+     * are not
      * reflected in the returned value.
      *
-     * @return a Map from PathConstraint to String constraint code (a single character)
+     * @return a Map from PathConstraint to String constraint code (a single
+     *         character)
      */
     public synchronized Map<PathConstraint, String> getConstraints() {
         Map<PathConstraint, String> retval = new LinkedHashMap<PathConstraint, String>(constraints);
@@ -765,7 +895,7 @@ public class PathQuery implements Cloneable
      *
      * @param code a single uppercase character
      * @return a PathConstraint object
-     * @throws NullPointerException if code is null
+     * @throws NullPointerException   if code is null
      * @throws NoSuchElementException if there is no PathConstraint for that code
      */
     public synchronized PathConstraint getConstraintForCode(String code) {
@@ -795,9 +925,12 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Return the constraint codes used in the query, some constraint types (subclasses) don't
-     * get assigned a code, these are not included.  This method returns all of the codes that
+     * Return the constraint codes used in the query, some constraint types
+     * (subclasses) don't
+     * get assigned a code, these are not included. This method returns all of the
+     * codes that
      * should be involved in the logic expression of the query.
+     * 
      * @return the constraint codes used in this query
      */
     public synchronized Set<String> getConstraintCodes() {
@@ -813,8 +946,10 @@ public class PathQuery implements Cloneable
     // ------------------- Constraint Logic Control -------------------
 
     /**
-     * Returns the current constraint logic. The logic is returned in groups, according to the outer
-     * join layout of the query. Two codes in separate groups can only be combined with an AND
+     * Returns the current constraint logic. The logic is returned in groups,
+     * according to the outer
+     * join layout of the query. Two codes in separate groups can only be combined
+     * with an AND
      * operation and OR operation.
      *
      * @return the current constraint logic
@@ -852,15 +987,18 @@ public class PathQuery implements Cloneable
     // --------------------- Outer Joined-ness Control --------------------
 
     /**
-     * Returns the outer join status of the last part of a given path in this query. The given path
-     * expression should not contain any colons to represent outer joins, and should not contain
+     * Returns the outer join status of the last part of a given path in this query.
+     * The given path
+     * expression should not contain any colons to represent outer joins, and should
+     * not contain
      * any square brackets to represent subclass constraints.
      *
      * @param path a String path to check
      * @return an OuterJoinStatus object, or null if no information is held
-     * @throws NullPointerException if path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized OuterJoinStatus getOuterJoinStatus(String path) {
         checkPathFormat(path);
@@ -868,16 +1006,20 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Sets the outer join status of the last part of a given path in this query. The given path
-     * expression should not contain any colons to represent outer joins, and should not contain
-     * any square brackets to represent subclass constraints. To remove outer join status from a
+     * Sets the outer join status of the last part of a given path in this query.
+     * The given path
+     * expression should not contain any colons to represent outer joins, and should
+     * not contain
+     * any square brackets to represent subclass constraints. To remove outer join
+     * status from a
      * path, call this method with a null status.
      *
-     * @param path a String path to set
+     * @param path   a String path to set
      * @param status an OuterJoinStatus object
-     * @throws NullPointerException if path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void setOuterJoinStatus(String path, OuterJoinStatus status) {
         deVerify();
@@ -890,8 +1032,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns an unmodifiable Map which is a copy of the current outer join status of this query at
-     * the time of execution of this method. Further changes to this object will not be reflected in
+     * Returns an unmodifiable Map which is a copy of the current outer join status
+     * of this query at
+     * the time of execution of this method. Further changes to this object will not
+     * be reflected in
      * the object that was returned from this method.
      *
      * @return a Map from String path to OuterJoinStatus
@@ -910,8 +1054,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns a Map from path to TRUE for all paths that are outer joined. That is, if the path is
-     * an outer join (not referring to its parents - use isCompletelyInner() for that), then it is
+     * Returns a Map from path to TRUE for all paths that are outer joined. That is,
+     * if the path is
+     * an outer join (not referring to its parents - use isCompletelyInner() for
+     * that), then it is
      * present in this map mapped onto the value TRUE.
      *
      * @return a Map from String to Boolean TRUE
@@ -929,15 +1075,18 @@ public class PathQuery implements Cloneable
     // -------------------- Path Description Control --------------------
 
     /**
-     * Returns the description for a given path, or null if no description is registered. The given
-     * path expression should not contain any colons to represent outer joins, and should not
+     * Returns the description for a given path, or null if no description is
+     * registered. The given
+     * path expression should not contain any colons to represent outer joins, and
+     * should not
      * contain any square brackets to represent subclass constraints.
      *
      * @param path a String path to check
      * @return a String description
-     * @throws NullPointerException if path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized String getDescription(String path) {
         checkPathFormat(path);
@@ -945,16 +1094,20 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Sets the description for a given path. The given path expression should not contain any
-     * colons to represent outer joins, and should not contain any square brackets to represent
-     * subclass constraints. To clear the description on a path, call this method with a null
+     * Sets the description for a given path. The given path expression should not
+     * contain any
+     * colons to represent outer joins, and should not contain any square brackets
+     * to represent
+     * subclass constraints. To clear the description on a path, call this method
+     * with a null
      * description.
      *
-     * @param path the String path to set
+     * @param path        the String path to set
      * @param description a String description or null
-     * @throws NullPointerException if path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     if path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void setDescription(String path, String description) {
         deVerify();
@@ -967,8 +1120,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns an unmodifiable Map which is a copy of the current set of path descriptions of this
-     * query at the time of execution of this method. Further changes to this object will not
+     * Returns an unmodifiable Map which is a copy of the current set of path
+     * descriptions of this
+     * query at the time of execution of this method. Further changes to this object
+     * will not
      * be reflected in the object that was returned from this method.
      *
      * @return a Map from String path to description
@@ -986,14 +1141,16 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the path description for the given path. The description is computed from the set
+     * Returns the path description for the given path. The description is computed
+     * from the set
      * descriptions of parent classes.
      *
      * @param path a String path with no square brackets or colons
      * @return a String description
-     * @throws NullPointerException is path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     is path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized String getGeneratedPathDescription(String path) {
         checkPathFormat(path);
@@ -1004,16 +1161,16 @@ public class PathQuery implements Cloneable
                 return path;
             } else {
                 return getGeneratedPathDescription(path.substring(0, lastDot)) + " > "
-                    + path.substring(lastDot + 1);
+                        + path.substring(lastDot + 1);
             }
         } else {
             return retval;
         }
     }
 
-
     /**
      * Returns the paths descriptions for the view.
+     * 
      * @return A list of column names
      */
     public List<String> getColumnHeaders() {
@@ -1049,6 +1206,7 @@ public class PathQuery implements Cloneable
 
     /**
      * Gets the title for this query.
+     * 
      * @return The title of the query
      */
     public String getTitle() {
@@ -1057,6 +1215,7 @@ public class PathQuery implements Cloneable
 
     /**
      * Sets the name of the query.
+     * 
      * @param title the new title, or null for none.
      */
     public void setTitle(String title) {
@@ -1067,13 +1226,15 @@ public class PathQuery implements Cloneable
     // -------------------- Removals --------------------
 
     /**
-     * Removes everything under a given path from the query, such that if the query was valid
+     * Removes everything under a given path from the query, such that if the query
+     * was valid
      * before, it will be valid after this method.
      *
      * @param path everything under this path will be removed from the query
-     * @throws NullPointerException is path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws NullPointerException     is path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized void removeAllUnder(String path) {
         checkPathFormat(path);
@@ -1122,12 +1283,16 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Removes everything from this query that is irrelevant, and therefore making the query
-     * invalid. If the query is invalid for other reasons, then this method will either throw an
-     * exception or ignore that part of the query, depending on the error, however the query is
+     * Removes everything from this query that is irrelevant, and therefore making
+     * the query
+     * invalid. If the query is invalid for other reasons, then this method will
+     * either throw an
+     * exception or ignore that part of the query, depending on the error, however
+     * the query is
      * unlikely to be made valid.
      *
-     * @throws PathException if the query is invalid for a reason other than irrelevance
+     * @throws PathException if the query is invalid for a reason other than
+     *                       irrelevance
      */
     public synchronized void removeAllIrrelevant() throws PathException {
         deVerify();
@@ -1140,7 +1305,8 @@ public class PathQuery implements Cloneable
         validateView(problems, validMainPaths);
         // Validate constraints
         validateConstraints(problems, validMainPaths);
-        // Now the validMainPaths set contains all the main (ie class) paths that are permitted in
+        // Now the validMainPaths set contains all the main (ie class) paths that are
+        // permitted in
         // this query.
         if (!(problems.isEmpty() || Arrays.asList(NO_VIEW_ERROR).equals(problems))) {
             throw new PathException(problems.toString(), null);
@@ -1175,12 +1341,15 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Fixes up the order by list and the constraint logic, given the arrangement of outer joins in
+     * Fixes up the order by list and the constraint logic, given the arrangement of
+     * outer joins in
      * the query.
      *
-     * @return a List of messages about the changes that this method has made to the query
-     * @throws PathException if the query is invalid in any way other than that which this method
-     * will fix.
+     * @return a List of messages about the changes that this method has made to the
+     *         query
+     * @throws PathException if the query is invalid in any way other than that
+     *                       which this method
+     *                       will fix.
      */
     public synchronized List<String> fixUpForJoinStyle() throws PathException {
         deVerify();
@@ -1193,7 +1362,8 @@ public class PathQuery implements Cloneable
         validateView(problems, validMainPaths);
         // Validate constraints
         validateConstraints(problems, validMainPaths);
-        // Now the validMainPaths set contains all the main (ie class) paths that are permitted in
+        // Now the validMainPaths set contains all the main (ie class) paths that are
+        // permitted in
         // this query.
         validateOuterJoins(problems, validMainPaths);
         calculateConstraintGroups(problems);
@@ -1234,15 +1404,18 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Removes a subclass from the query, and removes any parts of the query that relied on it.
-     * Returns a list of messages related to the extra things that had to be removed.
+     * Removes a subclass from the query, and removes any parts of the query that
+     * relied on it.
+     * Returns a list of messages related to the extra things that had to be
+     * removed.
      *
      * @param path the path of the subclass constraint to remove
      * @return a list of messages
-     * @throws PathException if the query is already invalid
-     * @throws NullPointerException is path is null
-     * @throws IllegalArgumentException if the path String contains colons or square brackets, or is
-     * otherwise in a bad format
+     * @throws PathException            if the query is already invalid
+     * @throws NullPointerException     is path is null
+     * @throws IllegalArgumentException if the path String contains colons or square
+     *                                  brackets, or is
+     *                                  otherwise in a bad format
      */
     public synchronized List<String> removeSubclassAndFixUp(String path) throws PathException {
         checkPathFormat(path);
@@ -1329,12 +1502,14 @@ public class PathQuery implements Cloneable
     // -------------------- Other assorted stuff --------------------
 
     /**
-     * Returns a deep copy of this object. The resulting object may be modified without impacting
+     * Returns a deep copy of this object. The resulting object may be modified
+     * without impacting
      * this object.
      *
      * @return a PathQuery
      */
-    @Override public PathQuery clone() {
+    @Override
+    public PathQuery clone() {
         try {
             PathQuery retval = (PathQuery) super.clone();
             retval.view = new ArrayList<String>(retval.view);
@@ -1343,8 +1518,7 @@ public class PathQuery implements Cloneable
             if (retval.logic != null) {
                 retval.logic = new LogicExpression(retval.logic.toString());
             }
-            retval.outerJoinStatus = new LinkedHashMap<String, OuterJoinStatus>(retval
-                    .outerJoinStatus);
+            retval.outerJoinStatus = new LinkedHashMap<String, OuterJoinStatus>(retval.outerJoinStatus);
             retval.descriptions = new LinkedHashMap<String, String>(retval.descriptions);
             return retval;
         } catch (CloneNotSupportedException e) {
@@ -1353,13 +1527,16 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Produces a Path object from the given path String, using subclass information from the query.
-     * Note that this method does not verify the query, but merely attempts to extract as much sane
+     * Produces a Path object from the given path String, using subclass information
+     * from the query.
+     * Note that this method does not verify the query, but merely attempts to
+     * extract as much sane
      * subclass information as possible to construct the Path.
      *
      * @param path the String path
      * @return a Path object
-     * @throws PathException if something goes wrong, or if the path is in an invalid format
+     * @throws PathException if something goes wrong, or if the path is in an
+     *                       invalid format
      */
     public synchronized Path makePath(String path) throws PathException {
         Map<String, String> lSubclasses = new HashMap<String, String>();
@@ -1386,24 +1563,34 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Verifies the contents of this query against the model, and for internal integrity. Returns
-     * a list of String problems that would need to be rectified for this query to pass validation
-     * and be executed. If the return value is an empty List, then the query is valid.
+     * Verifies the contents of this query against the model, and for internal
+     * integrity. Returns
+     * a list of String problems that would need to be rectified for this query to
+     * pass validation
+     * and be executed. If the return value is an empty List, then the query is
+     * valid.
      * <BR>
      * This method validates a few important characteristics about the query:
-     * <UL><LI>All subclass constraints must be subclasses of the class they would otherwise be</LI>
-     *     <LI>All paths must validate against the model</LI>
-     *     <LI>All paths need to extend from the same root class</LI>
-     *     <LI>Paths in the order by list, the outer join status, and the descriptions, must all be
-     * attached to classes already defined by the view list and the constraints. Otherwise, it would
+     * <UL>
+     * <LI>All subclass constraints must be subclasses of the class they would
+     * otherwise be</LI>
+     * <LI>All paths must validate against the model</LI>
+     * <LI>All paths need to extend from the same root class</LI>
+     * <LI>Paths in the order by list, the outer join status, and the descriptions,
+     * must all be
+     * attached to classes already defined by the view list and the constraints.
+     * Otherwise, it would
      * be possible to change the number of rows by changing the order</LI>
-     *     <LI>All elements of the view list and the order by list must be attributes, and all
-     * paths for outer join status and subclass constraints must not be attributes</LI>
-     *     <LI>Subclass constraints cannot be on the root class of the query</LI>
-     *     <LI>Loop constraints cannot cross an outer join</LI>
-     *     <LI>Check constraint values against their types in the model and specific
+     * <LI>All elements of the view list and the order by list must be attributes,
+     * and all
+     * paths for outer join status and subclass constraints must not be
+     * attributes</LI>
+     * <LI>Subclass constraints cannot be on the root class of the query</LI>
+     * <LI>Loop constraints cannot cross an outer join</LI>
+     * <LI>Check constraint values against their types in the model and specific
      * characteristics</LI>
-     *     <LI>Check constraint logic for sanity and that it can be split into separate ANDed outer
+     * <LI>Check constraint logic for sanity and that it can be split into separate
+     * ANDed outer
      * join sections</LI>
      * </UL>
      *
@@ -1423,7 +1610,8 @@ public class PathQuery implements Cloneable
         validateView(problems, validMainPaths);
         // Validate constraints
         validateConstraints(problems, validMainPaths);
-        // Now the validMainPaths set contains all the main (ie class) paths that are permitted in
+        // Now the validMainPaths set contains all the main (ie class) paths that are
+        // permitted in
         // this query.
 
         // Validate subclass constraints against validMainPaths
@@ -1643,13 +1831,13 @@ public class PathQuery implements Cloneable
                         continue;
                     }
                     // TODO - make IS NULL work on references and collections.
-                    //if (constraint.getOp().equals(ConstraintOp.IS_NULL)) {
-                    //    if (!path.endIsAttribute()) {
-                    //        problems.add("Constraint " + constraint
-                    //                + " is invalid - can only set IS NULL on an attribute");
-                    //        continue;
-                    //    }
-                    //}
+                    // if (constraint.getOp().equals(ConstraintOp.IS_NULL)) {
+                    // if (!path.endIsAttribute()) {
+                    // problems.add("Constraint " + constraint
+                    // + " is invalid - can only set IS NULL on an attribute");
+                    // continue;
+                    // }
+                    // }
                 } else if (constraint instanceof PathConstraintBag) {
                     // We do not check that the bag exists here. Call getBagNames() and check
                     // elsewhere.
@@ -1670,7 +1858,7 @@ public class PathQuery implements Cloneable
                                 + " must be on a class or reference");
                         continue;
                     }
-                    for (String typeName: ((PathConstraintMultitype) constraint).getValues()) {
+                    for (String typeName : ((PathConstraintMultitype) constraint).getValues()) {
                         ClassDescriptor cd = model.getClassDescriptorByName(typeName);
                         if (cd == null) {
                             problems.add(String.format(
@@ -1721,7 +1909,7 @@ public class PathQuery implements Cloneable
                             continue;
                         }
                         String newRootClass = loopPath.getStartClassDescriptor()
-                            .getUnqualifiedName();
+                                .getUnqualifiedName();
                         if (!rootClass.equals(newRootClass)) {
                             problems.add("Multiple root classes in query: " + rootClass + " and "
                                     + newRootClass);
@@ -1813,15 +2001,15 @@ public class PathQuery implements Cloneable
                 subclassConstraints.add((PathConstraintSubclass) constraint);
             }
         }
-        PathConstraintSubclass[] subclassConstraintArray = subclassConstraints.toArray(new
-                PathConstraintSubclass[0]);
+        PathConstraintSubclass[] subclassConstraintArray = subclassConstraints.toArray(new PathConstraintSubclass[0]);
         Arrays.sort(subclassConstraintArray, new Comparator<PathConstraintSubclass>() {
-                @Override
-                public int compare(PathConstraintSubclass o1, PathConstraintSubclass o2) {
-                    return o1.getPath().length() - o2.getPath().length();
-                }
-            });
-        // subclassConstraintArray should now be in order of increasing length of path string, so it
+            @Override
+            public int compare(PathConstraintSubclass o1, PathConstraintSubclass o2) {
+                return o1.getPath().length() - o2.getPath().length();
+            }
+        });
+        // subclassConstraintArray should now be in order of increasing length of path
+        // string, so it
         // should be fine to just build the subclass constraints map
         subclasses = new LinkedHashMap<String, String>();
         for (PathConstraintSubclass subclass : subclassConstraintArray) {
@@ -1891,7 +2079,8 @@ public class PathQuery implements Cloneable
     /**
      * Returns the subclass Map for this query, if the query verifies correctly.
      *
-     * @return a Map from path String to subclass name, for all PathConstraintSubclass objects
+     * @return a Map from path String to subclass name, for all
+     *         PathConstraintSubclass objects
      * @throws PathException if the query does not verify
      */
     public synchronized Map<String, String> getSubclasses() throws PathException {
@@ -1904,6 +2093,7 @@ public class PathQuery implements Cloneable
 
     /**
      * Returns true if the query has no features yet.
+     * 
      * @return whether or not this query is empty.
      */
     public synchronized boolean isEmpty() {
@@ -1926,8 +2116,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the outer join groups map for this query, if the query verifies correctly. This is a
-     * Map from all the class paths in the query to the outer join group, represented by the path of
+     * Returns the outer join groups map for this query, if the query verifies
+     * correctly. This is a
+     * Map from all the class paths in the query to the outer join group,
+     * represented by the path of
      * the root of the group.
      *
      * @return a Map from path String to the outer join group it is in
@@ -1942,7 +2134,8 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the set of loop constraint descriptive strings, for the purpose of checking for
+     * Returns the set of loop constraint descriptive strings, for the purpose of
+     * checking for
      * uniqueness.
      *
      * @return a Set of Strings
@@ -1961,8 +2154,8 @@ public class PathQuery implements Cloneable
      *
      * @param stringPath a pathString
      * @return a String representing the outer join group that the path is in
-     * @throws NullPointerException if pathString is null
-     * @throws PathException if the query is invalid or the path is invalid
+     * @throws NullPointerException   if pathString is null
+     * @throws PathException          if the query is invalid or the path is invalid
      * @throws NoSuchElementException is the path is not in the query
      */
     public String getOuterJoinGroup(String stringPath) throws PathException {
@@ -1984,10 +2177,11 @@ public class PathQuery implements Cloneable
      * Returns true if a path string is in the root outer join group of this query.
      *
      * @param stringPath a path String
-     * @return true if the given path is in the root outer join group, false if it contains outer
-     * joins
-     * @throws NullPointerException if pathString is null
-     * @throws PathException if the query is invalid or the path is invalid
+     * @return true if the given path is in the root outer join group, false if it
+     *         contains outer
+     *         joins
+     * @throws NullPointerException   if pathString is null
+     * @throws PathException          if the query is invalid or the path is invalid
      * @throws NoSuchElementException if the path is not in the query
      */
     public boolean isPathCompletelyInner(String stringPath) throws PathException {
@@ -1996,15 +2190,19 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the set of paths that could feasibly be loop constrained onto the given path, given
-     * the current outer join situation. A candidate path must be a class path, of the same type,
-     * and in the same outer join group. It must also not be already looped onto this path.
+     * Returns the set of paths that could feasibly be loop constrained onto the
+     * given path, given
+     * the current outer join situation. A candidate path must be a class path, of
+     * the same type,
+     * and in the same outer join group. It must also not be already looped onto
+     * this path.
      *
      * @param stringPath a path String
      * @return a Set of path strings that could be looped onto the given path
-     * @throws NullPointerException if stringPath is null
+     * @throws NullPointerException     if stringPath is null
      * @throws IllegalArgumentException if stringPath refers to an attribute
-     * @throws PathException if the query is invalid or stringPath is invalid
+     * @throws PathException            if the query is invalid or stringPath is
+     *                                  invalid
      */
     public synchronized Set<String> getCandidateLoops(String stringPath) throws PathException {
         if (stringPath == null) {
@@ -2044,7 +2242,7 @@ public class PathQuery implements Cloneable
             if (!entry.getKey().equals(stringPath)) {
                 Path entryPath = makePath(entry.getKey());
                 if (type.isAssignableFrom(entryPath.getEndType())
-                    || entryPath.getEndType().isAssignableFrom(type)) {
+                        || entryPath.getEndType().isAssignableFrom(type)) {
                     if (group != null && group.equals(entry.getValue())) {
                         String desc = stringPath.compareTo(entry.getKey()) > 0
                                 ? entry.getKey() + " -- " + stringPath
@@ -2060,23 +2258,26 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the outer join constraint codes groups map for this query, if the query verifies
+     * Returns the outer join constraint codes groups map for this query, if the
+     * query verifies
      * correctly.
      *
-     * @return a Map from outer join group to the Set of constraint codes in the group
+     * @return a Map from outer join group to the Set of constraint codes in the
+     *         group
      * @throws PathException if the query does not verify
      */
     public synchronized Map<String, Set<String>> getConstraintGroups() throws PathException {
         List<String> problems = verifyQuery();
         if (problems.isEmpty() || Arrays.asList(NO_VIEW_ERROR).equals(problems)) {
             return Collections.unmodifiableMap(new LinkedHashMap<String, Set<String>>(
-                        constraintGroups));
+                    constraintGroups));
         }
         throw new PathException("Query does not verify: " + problems, null);
     }
 
     /**
-     * Returns a List of logic Strings according to the different outer join sections of the query.
+     * Returns a List of logic Strings according to the different outer join
+     * sections of the query.
      *
      * @return a List of String
      * @throws PathException if the query does not verify
@@ -2097,15 +2298,16 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns the constraint logic for the given outer join group, if the query verifies correctly.
+     * Returns the constraint logic for the given outer join group, if the query
+     * verifies correctly.
      *
      * @param group an outer join group
      * @return the constraint logic for the constraints in that outer join group
-     * @throws PathException if the query does not verify
+     * @throws PathException            if the query does not verify
      * @throws IllegalArgumentException if the group is not present in this query
      */
     public synchronized LogicExpression getConstraintLogicForGroup(String group)
-        throws PathException {
+            throws PathException {
         List<String> problems = verifyQuery();
         if (problems.isEmpty()) {
             if (logic == null) {
@@ -2128,10 +2330,11 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Adds all the parts of a Path to a Set. Call this with only a non-attribute Path.
+     * Adds all the parts of a Path to a Set. Call this with only a non-attribute
+     * Path.
      *
      * @param validMainPaths a Set of Strings to add to
-     * @param path a Path object
+     * @param path           a Path object
      */
     private static void addValidPaths(Set<String> validMainPaths, Path path) {
         Path pathToAdd = path;
@@ -2143,8 +2346,10 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Returns true if the given Path object represents a path that is inner-joined onto the parent
-     * path in this query. This will return false for the root class. Do not call this method with
+     * Returns true if the given Path object represents a path that is inner-joined
+     * onto the parent
+     * path in this query. This will return false for the root class. Do not call
+     * this method with
      * a Path that is an attribute.
      *
      * @param path a Path object
@@ -2170,21 +2375,21 @@ public class PathQuery implements Cloneable
     }
 
     // A Path name is the same as a valid java qualified identifier.
-    private static final String JAVA_IDENT_PATTERN =
-            "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
+    private static final String JAVA_IDENT_PATTERN = "\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*";
     // Zero or more dot-suffixed prefixes + an identifier
-    private static final String PATH_PATTERN =
-            "(" + JAVA_IDENT_PATTERN + "\\.)*" + JAVA_IDENT_PATTERN;
+    private static final String PATH_PATTERN = "(" + JAVA_IDENT_PATTERN + "\\.)*" + JAVA_IDENT_PATTERN;
     private static final Pattern PATH_MATCHER = Pattern.compile(PATH_PATTERN);
 
     /**
-     * Verifies the format of a path for a query. Paths must fully match the regular expression
+     * Verifies the format of a path for a query. Paths must fully match the regular
+     * expression
      * "([a-zA-Z0-9]+\.)*[a-zA-Z0-9]+"
      *
      * @param path a String path
-     * @throws NullPointerException if path is null
-     * @throws IllegalArgumentException if path contains colons or square brackets, or is otherwise
-     * in a bad format
+     * @throws NullPointerException     if path is null
+     * @throws IllegalArgumentException if path contains colons or square brackets,
+     *                                  or is otherwise
+     *                                  in a bad format
      */
     public static void checkPathFormat(String path) {
         if (path == null) {
@@ -2197,10 +2402,14 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Get the PathQuery that should be executed.  This should be called by code creating an
-     * ObjectStore query from a PathQuery.  For PathQuery the method returns this, subclasses can
-     * override.  TemplateQuery removes optional constraints that have been switched off in the
+     * Get the PathQuery that should be executed. This should be called by code
+     * creating an
+     * ObjectStore query from a PathQuery. For PathQuery the method returns this,
+     * subclasses can
+     * override. TemplateQuery removes optional constraints that have been switched
+     * off in the
      * returned query.
+     * 
      * @return a version of the query to execute
      */
     public PathQuery getQueryToExecute() {
@@ -2208,32 +2417,36 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * A method to sort constraints by a given lists, provided to allow TemplateQuery to set a
-     * specific sort order that will be preserved in a round-trip to XML.  A list of constraints
-     * is provided, the constraints map is updated to reflect that order.  The list does not need
-     * to contain all constraints in the query - TemplateQuery only needs to order the editable
+     * A method to sort constraints by a given lists, provided to allow
+     * TemplateQuery to set a
+     * specific sort order that will be preserved in a round-trip to XML. A list of
+     * constraints
+     * is provided, the constraints map is updated to reflect that order. The list
+     * does not need
+     * to contain all constraints in the query - TemplateQuery only needs to order
+     * the editable
      * constraints.
+     * 
      * @param listToSortBy a list to define the new constraint order
      */
     protected synchronized void sortConstraints(List<PathConstraint> listToSortBy) {
         ConstraintComparator comparator = new ConstraintComparator(listToSortBy);
-        TreeMap<PathConstraint, String> orderedConstraints =
-            new TreeMap<PathConstraint, String>(comparator);
+        TreeMap<PathConstraint, String> orderedConstraints = new TreeMap<PathConstraint, String>(comparator);
         orderedConstraints.putAll(constraints);
         constraints = new LinkedHashMap<PathConstraint, String>(orderedConstraints);
     }
 
-    private class ConstraintComparator implements Comparator<PathConstraint>
-    {
+    private class ConstraintComparator implements Comparator<PathConstraint> {
         private final List<PathConstraint> listToSortBy;
 
-        ConstraintComparator (List<PathConstraint> listToSortBy) {
+        ConstraintComparator(List<PathConstraint> listToSortBy) {
             this.listToSortBy = listToSortBy;
         }
 
         @Override
         public int compare(PathConstraint c1, PathConstraint c2) {
-            // if neither in list we don't care how they compare, but want a consistent order
+            // if neither in list we don't care how they compare, but want a consistent
+            // order
             if (!listToSortBy.contains(c1) && !listToSortBy.contains(c2)) {
                 return -1;
             }
@@ -2244,18 +2457,22 @@ public class PathQuery implements Cloneable
     }
 
     /**
-     * Converts this object into a rudimentary String format, containing all the data.
+     * Converts this object into a rudimentary String format, containing all the
+     * data.
      *
      * {@inheritDoc}
      */
-    @Override public synchronized String toString() {
+    @Override
+    public synchronized String toString() {
         return "PathQuery( view: " + view + ", orderBy: " + orderBy + ", constraints: "
-            + constraints + ", logic: " + logic + ", outerJoinStatus: " + outerJoinStatus
-            + ", descriptions: " + descriptions + ", description: " + description + ")";
+                + constraints + ", logic: " + logic + ", outerJoinStatus: " + outerJoinStatus
+                + ", descriptions: " + descriptions + ", description: " + description + ")";
     }
 
     /**
-     * Convert a PathQuery to XML, using the default value of PathQuery.USERPROFILE_VERSION
+     * Convert a PathQuery to XML, using the default value of
+     * PathQuery.USERPROFILE_VERSION
+     * 
      * @return This query as xml
      */
     public synchronized String toXml() {
@@ -2264,8 +2481,9 @@ public class PathQuery implements Cloneable
 
     /**
      * Add a JSON property when serialising
-     * @param sb The buffer we are serialing to.
-     * @param key the property name.
+     * 
+     * @param sb    The buffer we are serialing to.
+     * @param key   the property name.
      * @param value the property value.
      **/
     protected void addJsonProperty(StringBuffer sb, String key, Object value) {
@@ -2279,7 +2497,8 @@ public class PathQuery implements Cloneable
 
     /**
      * Format a key-value pair in a JSON compatible way.
-     * @param key The key
+     * 
+     * @param key   The key
      * @param value The value
      * @return A string, all nicely formatted
      */
@@ -2287,7 +2506,7 @@ public class PathQuery implements Cloneable
         if (value instanceof List) {
             StringBuffer sb = new StringBuffer("[");
             boolean needsSep = false;
-            for (Object obj: (List<?>) value) {
+            for (Object obj : (List<?>) value) {
                 if (needsSep) {
                     sb.append(",");
                 }
@@ -2298,13 +2517,12 @@ public class PathQuery implements Cloneable
             return "\"" + key + "\":" + sb.toString();
         } else if (value instanceof String) {
             String newValue = StringEscapeUtils.escapeJava((String) value);
-            return "\"" + key + "\":\""  + newValue + "\"";
-        }  else if (value instanceof Boolean) {
-            return "\"" + key + "\":"  + value;
+            return "\"" + key + "\":\"" + newValue + "\"";
+        } else if (value instanceof Boolean) {
+            return "\"" + key + "\":" + value;
         }
         throw new IllegalArgumentException(value + " must be either String or a list of strings");
     }
-
 
     /**
      * toJson synonym for JSPs.
@@ -2348,7 +2566,8 @@ public class PathQuery implements Cloneable
      *
      * The returned version should be trimmed to represent only the current state
      * of the query, not all possible states.
-     * @param onlyRelevant  whether to only return relevant, active constraints.
+     * 
+     * @param onlyRelevant whether to only return relevant, active constraints.
      *
      * @return This query as json.
      */
@@ -2361,6 +2580,7 @@ public class PathQuery implements Cloneable
      *
      * The returned version should be trimmed to represent only the current state
      * of the query, not all possible states.
+     * 
      * @param date the creation date, used by savedquery
      *
      * @return This query as json.
@@ -2371,23 +2591,23 @@ public class PathQuery implements Cloneable
 
     /**
      * Convert this PathQuery to a JSON serialisation.
-     * @param onlyRelevant  whether to only return relevant, active constraints.
-     * @param date the creation date, used by savedquery
+     * 
+     * @param onlyRelevant whether to only return relevant, active constraints.
+     * @param date         the creation date, used by savedquery
      * @return This query as json.
      */
     public synchronized String toJson(boolean onlyRelevant, Date date) {
         StringBuffer sb = new StringBuffer("{");
 
         if (date != null) {
-            sb.append("\"created\": " + ConstraintValueParser.ISO_DATE_FORMAT.format(date) + ",");
+            sb.append("\"created\": " + ConstraintValueParser.ISO_DATE_FORMAT.format(date.toInstant()) + ",");
         }
         sb.append(String.format("\"model\":{\"name\":\"%s\"}",
-                    model.getName()));
+                model.getName()));
 
-        for (Entry<String, Object> attr: getHeadAttributes().entrySet()) {
+        for (Entry<String, Object> attr : getHeadAttributes().entrySet()) {
             addJsonProperty(sb, attr.getKey(), attr.getValue());
         }
-
 
         // SORT ORDER
         List<OrderElement> order = getOrderBy();
@@ -2403,13 +2623,11 @@ public class PathQuery implements Cloneable
             sb.append("]");
         }
 
-
         // JOINS
         Map<String, OuterJoinStatus> ojs = getOuterJoinStatus();
         if (!ojs.isEmpty()) {
             StringBuilder sb2 = new StringBuilder();
-            for (Iterator<Entry<String, OuterJoinStatus>> it = ojs.entrySet().iterator();
-                it.hasNext();) {
+            for (Iterator<Entry<String, OuterJoinStatus>> it = ojs.entrySet().iterator(); it.hasNext();) {
                 Entry<String, OuterJoinStatus> pair = it.next();
                 if (pair.getValue() == OuterJoinStatus.OUTER) {
                     if (sb2.length() > 0) {
@@ -2424,8 +2642,7 @@ public class PathQuery implements Cloneable
         }
 
         // CONSTRAINTS
-        Map<PathConstraint, String> cons =
-                onlyRelevant ? getRelevantConstraints() : getConstraints();
+        Map<PathConstraint, String> cons = onlyRelevant ? getRelevantConstraints() : getConstraints();
         if (!cons.isEmpty()) {
             sb.append(",\"where\":[");
             Iterator<Entry<PathConstraint, String>> it = cons.entrySet().iterator();
@@ -2446,6 +2663,7 @@ public class PathQuery implements Cloneable
 
     /**
      * format a type constraint to a JSON representation.
+     * 
      * @param constraint the constraint to format.
      * @return The JSONification.
      */
@@ -2457,8 +2675,9 @@ public class PathQuery implements Cloneable
 
     /**
      * Get the JSON prefix common to all constraints.
+     * 
      * @param constraint the constraint to format.
-     * @param code The constraint code.
+     * @param code       The constraint code.
      * @return The prefix
      */
     protected String getCommonJsonConstraintPrefix(String code, PathConstraint constraint) {
@@ -2466,12 +2685,13 @@ public class PathQuery implements Cloneable
         String op = constraint.getOp().toString();
 
         return "{\"path\":\"" + path + "\",\"op\":\"" + op + "\",\"code\":\""
-                              + code + "\"";
+                + code + "\"";
     }
 
     /**
      * Format a value constraint to a JSON representation.
-     * @param code The constraint code.
+     * 
+     * @param code       The constraint code.
      * @param constraint constraint.
      * @return The stringification.
      */
@@ -2510,7 +2730,7 @@ public class PathQuery implements Cloneable
             if (value != null) {
                 if (constraint instanceof PathConstraintLoop) {
                     conb.append(",\"loopPath\":\"" + StringEscapeUtils.escapeJava(value)
-                        + "\"");
+                            + "\"");
                 } else {
                     conb.append(",\"value\":\"" + StringEscapeUtils.escapeJava(value) + "\"");
                 }
@@ -2525,7 +2745,7 @@ public class PathQuery implements Cloneable
 
     /**
      * @param constraint constraint to convert
-     * @param code code for constraint, e.g. A
+     * @param code       code for constraint, e.g. A
      * @return constraint in JSON format
      */
     protected String constraintToJson(PathConstraint constraint, String code) {

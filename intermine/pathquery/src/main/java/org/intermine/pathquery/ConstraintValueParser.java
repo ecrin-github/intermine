@@ -13,6 +13,10 @@ package org.intermine.pathquery;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -24,10 +28,10 @@ import org.intermine.metadata.TypeUtil;
 
 /**
  * Parser for parsing constraint value.
+ * 
  * @author Jakub Kulaviak
  **/
-public final class ConstraintValueParser
-{
+public final class ConstraintValueParser {
     private static final Logger LOG = Logger.getLogger(ConstraintValueParser.class);
 
     private ConstraintValueParser() {
@@ -36,22 +40,27 @@ public final class ConstraintValueParser
     /**
      * A date format for ISO dates.
      */
-    public static final DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    static {
-        Calendar gregorianCalendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("GMT"));
-        ISO_DATE_FORMAT.setCalendar(gregorianCalendar);
-    }
+    // public static final DateFormat ISO_DATE_FORMAT = new
+    // SimpleDateFormat("yyyy-MM-dd");
+    public static final DateTimeFormatter ISO_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            .withZone(ZoneId.of("GMT"));
+
+    // static {
+    // Calendar gregorianCalendar =
+    // GregorianCalendar.getInstance(TimeZone.getTimeZone("GMT"));
+    // ISO_DATE_FORMAT.setCalendar(gregorianCalendar);
+    // }
 
     /**
      * Parses a value.
      *
      * @param value parsed value
-     * @param type Java type, it is type of returned object
+     * @param type  Java type, it is type of returned object
      * @return converted object
      * @throws ParseValueException if value can not be converted to required type
      */
     public static Object parse(String value, Class<?> type)
-        throws ParseValueException {
+            throws ParseValueException {
         Object parsedValue = null;
 
         if (value == null || value.length() == 0) {
@@ -61,9 +70,9 @@ public final class ConstraintValueParser
         if (Date.class.equals(type)) {
             try {
                 parsedValue = ISO_DATE_FORMAT.parse(value);
-            } catch (ParseException e) {
+            } catch (DateTimeParseException e) {
                 throw new ParseValueException(value + " is not a valid date - example: "
-                        + ISO_DATE_FORMAT.format(new Date()));
+                        + ISO_DATE_FORMAT.format(LocalDate.now()));
             }
         } else if (String.class.equals(type)) {
             if (value.length() == 0) {
@@ -96,7 +105,7 @@ public final class ConstraintValueParser
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         try {
             Date date = sdf.parse(value);
-            return ISO_DATE_FORMAT.format(date);
+            return ISO_DATE_FORMAT.format(date.toInstant());
         } catch (ParseException e) {
             LOG.log(Priority.ERROR, "The date" + value + " is not a valid date", e);
         }

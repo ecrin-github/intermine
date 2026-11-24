@@ -30,13 +30,14 @@ import org.intermine.pathquery.Path;
 import org.json.JSONObject;
 
 /**
- * A class to to produce a sequence of JSONObjects from a set of database rows. This requires
+ * A class to to produce a sequence of JSONObjects from a set of database rows.
+ * This requires
  * that the view be set up in a specific way.
+ * 
  * @author Alexis Kalderimis
  *
  */
-public class JSONResultsIterator implements Iterator<JSONObject>
-{
+public class JSONResultsIterator implements Iterator<JSONObject> {
 
     private static final String CLASS_KEY = "class";
     private static final String ID_KEY = "objectId";
@@ -50,7 +51,9 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     private Model model;
 
     /**
-     * Constructor. The JSON Iterator sits on top of the basic export results iterator.
+     * Constructor. The JSON Iterator sits on top of the basic export results
+     * iterator.
+     * 
      * @param it An ExportResultsIterator
      */
     public JSONResultsIterator(ExportResultsIterator it) {
@@ -124,10 +127,12 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Test whether a result element matches the type of its path.
+     * 
      * @param cell The Result element
      * @param path The path which represents the view column
-     * @return true if the cell is null, or contains null information, extends/implements the
-     * type of path.
+     * @return true if the cell is null, or contains null information,
+     *         extends/implements the
+     *         type of path.
      */
     protected boolean isCellValidForPath(ResultElement cell, Path path) {
         if (cell == null || cell.getType() == null) {
@@ -138,6 +143,7 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Test whether a class named "A" is, or descends from, a class named "B".
+     * 
      * @param a The name of a class
      * @param b The name of a class
      * @return True if a isa b
@@ -161,6 +167,7 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Test whether a class named "a" descends from a class named "b".
+     * 
      * @param a the name of a class
      * @param b the name of a class
      * @return True if a descends from b
@@ -180,10 +187,13 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     }
 
     /**
-     * Sets the basic information (class and objectId) on the jsonMap provided. If the map already
-     * has values, it makes sure that these are compatible with those of the result element given.
-     * @param cell The result element
-     * @param path The path representing the column
+     * Sets the basic information (class and objectId) on the jsonMap provided. If
+     * the map already
+     * has values, it makes sure that these are compatible with those of the result
+     * element given.
+     * 
+     * @param cell    The result element
+     * @param path    The path representing the column
      * @param jsonMap The map to put the field on
      * @throws JSONFormattingException if the details do not match
      */
@@ -195,9 +205,11 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     }
 
     /**
-     * Set the class, or if one is already set on the map, check that this one is valid for it.
-     * @param cell The result element
-     * @param path The path it represents
+     * Set the class, or if one is already set on the map, check that this one is
+     * valid for it.
+     * 
+     * @param cell    The result element
+     * @param path    The path it represents
      * @param jsonMap The map to set it onto
      */
     protected void setOrCheckClass(ResultElement cell, Path path, Map<String, Object> jsonMap) {
@@ -206,9 +218,9 @@ public class JSONResultsIterator implements Iterator<JSONObject>
             String storedType = (String) jsonMap.get(CLASS_KEY);
             if (!aIsaB(cell.getType(), storedType)) {
                 throw new JSONFormattingException(
-                    "This result element (" + cell + ") does not belong on this map (" + jsonMap
-                    + ") - classes don't match (" + cell.getType() + " ! isa "
-                    + jsonMap.get(CLASS_KEY) + ")");
+                        "This result element (" + cell + ") does not belong on this map (" + jsonMap
+                                + ") - classes don't match (" + cell.getType() + " ! isa "
+                                + jsonMap.get(CLASS_KEY) + ")");
             }
         }
 
@@ -217,14 +229,16 @@ public class JSONResultsIterator implements Iterator<JSONObject>
         } else {
             throw new JSONFormattingException(
                     "This result element (" + cell + ") does not match its column because: "
-                    + "classes not compatible " + "(" + thisType + " is not a superclass of "
-                    + cell.getType() + ")");
+                            + "classes not compatible " + "(" + thisType + " is not a superclass of "
+                            + cell.getType() + ")");
         }
     }
 
     /**
-     * Set the id, or if one is already set, check that it matches the one on the map.
-     * @param cell The result element.
+     * Set the id, or if one is already set, check that it matches the one on the
+     * map.
+     * 
+     * @param cell    The result element.
      * @param jsonMap The map to set it onto,
      */
     protected void setOrCheckId(ResultElement cell, Map<String, Object> jsonMap) {
@@ -233,11 +247,11 @@ public class JSONResultsIterator implements Iterator<JSONObject>
             Object mapId = jsonMap.get(ID_KEY);
             if (cellId != null && mapId != null && !jsonMap.get(ID_KEY).equals(cell.getId())) {
                 throw new JSONFormattingException(
-                                                  "This result element (" + cell
-                                                  + ") does not belong on this map (" + jsonMap
-                                                  + ") - objectIds don't match ("
-                                                  + jsonMap.get(ID_KEY) + " != " + cell.getId()
-                                                  + ")");
+                        "This result element (" + cell
+                                + ") does not belong on this map (" + jsonMap
+                                + ") - objectIds don't match ("
+                                + jsonMap.get(ID_KEY) + " != " + cell.getId()
+                                + ")");
             }
         } else {
             // If these are simple objects, a fake ID should have been appended.
@@ -255,13 +269,17 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     }
 
     /**
-     * Adds the attributes contained in the cell to the map given. It will not set the id attribute,
+     * Adds the attributes contained in the cell to the map given. It will not set
+     * the id attribute,
      * as that is handled by setOrCheckClassAndId.
-     * @param cell The result element
-     * @param column The path representing the view column
+     * 
+     * @param cell      The result element
+     * @param column    The path representing the view column
      * @param objectMap The map to put the values on
-     * @throws JSONFormattingException if the map already has values for this attribute
-     *                                  and they are different to the ones in the cell
+     * @throws JSONFormattingException if the map already has values for this
+     *                                 attribute
+     *                                 and they are different to the ones in the
+     *                                 cell
      */
     protected void addFieldToMap(ResultElement cell, Path column,
             Map<String, Object> objectMap) {
@@ -272,7 +290,7 @@ public class JSONResultsIterator implements Iterator<JSONObject>
         }
         Object newValue;
         if (cell.getField() instanceof Date) {
-            newValue = ConstraintValueParser.ISO_DATE_FORMAT.format(cell.getField());
+            newValue = ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) cell.getField()).toInstant());
         } else if (cell.getField() instanceof ClobAccess) {
             newValue = cell.getField().toString();
         } else if (cell.getField() == null) {
@@ -290,16 +308,15 @@ public class JSONResultsIterator implements Iterator<JSONObject>
                 if (newValue != null) {
                     throw new JSONFormattingException(
                             "Trying to set key " + key + " as " + newValue
-                            + " in " + objectMap + " but it already has the value "
-                            + current
-                    );
+                                    + " in " + objectMap + " but it already has the value "
+                                    + current);
                 }
             } else {
                 if (!current.equals(newValue)) {
                     throw new JSONFormattingException(
                             "Trying to set key " + key + " as " + newValue
-                            + " in " + objectMap + " but it already has the value "
-                            + current);
+                                    + " in " + objectMap + " but it already has the value "
+                                    + current);
                 }
             }
         } else {
@@ -309,12 +326,15 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Adds the information from a cell representing a reference to the map given.
-     * @param cell A cell representing the end of a trail of references.
-     * @param column The view column.
+     * 
+     * @param cell      A cell representing the end of a trail of references.
+     * @param column    The view column.
      * @param objectMap The map to put the nested trail of object onto
      * @throws JSONFormattingException if the paths that make up the trail
-     * contain one that is not an attribute, collection or reference (the only known types at
-     * present)
+     *                                 contain one that is not an attribute,
+     *                                 collection or reference (the only known types
+     *                                 at
+     *                                 present)
      */
     protected void addReferencedCellToJsonMap(ResultElement cell, Path column,
             Map<String, Object> objectMap) {
@@ -337,9 +357,12 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     }
 
     /**
-     * Finds the object we should be dealing with by getting it from the current array. A search
-     * is made by looking for a map which has the objectId attribute set to the same value as the
+     * Finds the object we should be dealing with by getting it from the current
+     * array. A search
+     * is made by looking for a map which has the objectId attribute set to the same
+     * value as the
      * result element we have.
+     * 
      * @param cell A result element
      * @throws JSONFormattingException if the current array is empty.
      */
@@ -374,7 +397,9 @@ public class JSONResultsIterator implements Iterator<JSONObject>
     }
 
     /**
-     * Sets the current map to work with by getting the last one from the current array.
+     * Sets the current map to work with by getting the last one from the current
+     * array.
+     * 
      * @throws JSONFormattingException if the array is null, or empty
      */
     protected void setCurrentMapFromCurrentArray() {
@@ -403,8 +428,10 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Adds an intermediate reference to the current node.
+     * 
      * @param referencePath The path representing the reference.
-     * @throws JSONFormattingException if the node has this key set to an incompatible value.
+     * @throws JSONFormattingException if the node has this key set to an
+     *                                 incompatible value.
      */
     protected void addReferenceToCurrentNode(Path referencePath) {
         if (currentMap == null) {
@@ -417,9 +444,9 @@ public class JSONResultsIterator implements Iterator<JSONObject>
             boolean storedItemIsMap = (storedItem instanceof Map<?, ?>);
             if (!storedItemIsMap) {
                 throw new JSONFormattingException("Trying to set a reference on " + key
-                    + ", but this node " + currentMap + " already "
-                    + "has this key set, and to something other than a map "
-                    + "(" + storedItem.getClass().getName() + ": " + storedItem + ")");
+                        + ", but this node " + currentMap + " already "
+                        + "has this key set, and to something other than a map "
+                        + "(" + storedItem.getClass().getName() + ": " + storedItem + ")");
             }
             @SuppressWarnings("unchecked") // the checking happens just above.
             Map<String, Object> foundMap = (Map<String, Object>) currentMap.get(key);
@@ -430,8 +457,7 @@ public class JSONResultsIterator implements Iterator<JSONObject>
             currentMap = foundMap;
         } else {
             Map<String, Object> newMap = new HashMap<String, Object>();
-            ReferenceDescriptor refDesc =
-                (ReferenceDescriptor) referencePath.getEndFieldDescriptor();
+            ReferenceDescriptor refDesc = (ReferenceDescriptor) referencePath.getEndFieldDescriptor();
             newMap.put(CLASS_KEY, refDesc.getReferencedClassDescriptor().getUnqualifiedName());
 
             currentMap.put(key, newMap);
@@ -441,9 +467,11 @@ public class JSONResultsIterator implements Iterator<JSONObject>
 
     /**
      * Adds a new list, representing a collection to the current node (map)
+     * 
      * @param collectionPath The path representing the collection.
-     * @throws JSONFormattingException if the current node is not initialised, or is already set
-     * with an incompatible value.
+     * @throws JSONFormattingException if the current node is not initialised, or is
+     *                                 already set
+     *                                 with an incompatible value.
      */
     @SuppressWarnings("unchecked")
     protected void addCollectionToCurrentNode(Path collectionPath) {
@@ -453,16 +481,16 @@ public class JSONResultsIterator implements Iterator<JSONObject>
         String key = collectionPath.getLastElement();
         if (!currentMap.containsKey(ID_KEY)) {
             throw new JSONFormattingException(
-                "This node is not properly initialised (it doesn't have an objectId) - "
-                + "is the view in the right order?");
+                    "This node is not properly initialised (it doesn't have an objectId) - "
+                            + "is the view in the right order?");
         }
         if (currentMap.containsKey(key)) {
             Object storedValue = currentMap.get(key);
             if (!(storedValue instanceof List<?>)) {
                 throw new JSONFormattingException("Trying to set a collection on " + key
-                    + ", but this node " + currentMap + " already "
-                    + "has this key set to something other than a list "
-                    + "(" + storedValue.getClass().getName() + ": " + storedValue + ")");
+                        + ", but this node " + currentMap + " already "
+                        + "has this key set to something other than a list "
+                        + "(" + storedValue.getClass().getName() + ": " + storedValue + ")");
             }
         } else {
             List<Map<String, Object>> newArray = new ArrayList<Map<String, Object>>();
