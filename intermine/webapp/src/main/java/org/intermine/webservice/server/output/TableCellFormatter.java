@@ -25,11 +25,11 @@ import org.json.JSONObject;
 
 /**
  * A formatter that will render a table cell.
+ * 
  * @author Alex Kalderimis
  *
  */
-public class TableCellFormatter
-{
+public class TableCellFormatter {
 
     private static final String CELL_KEY_URL = "url";
     private static final String CELL_KEY_VALUE = "value";
@@ -98,7 +98,7 @@ public class TableCellFormatter
                     cooked = cs.subSequence(0, maxCellLength) + "...";
                 }
             } else if (raw != null && raw instanceof Date) {
-                cooked = ConstraintValueParser.ISO_DATE_FORMAT.format(raw);
+                cooked = ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) raw).toInstant());
             } else {
                 cooked = raw;
             }
@@ -113,6 +113,7 @@ public class TableCellFormatter
 
     /**
      * Get the JSONObject that represents each cell in the results row
+     * 
      * @param cell The result element with the data
      * @return A JSONObject
      */

@@ -20,20 +20,23 @@ import org.intermine.pathquery.ConstraintValueParser;
 import org.intermine.webservice.server.output.Output;
 
 /**
- * Processor of Results object for easy accessing and parsing of results to list of strings.
- * Actually wrapped Results object is something like proxy that can access the database.
- * Write method is the point where the data are fetched from database and that's why is slow.
+ * Processor of Results object for easy accessing and parsing of results to list
+ * of strings.
+ * Actually wrapped Results object is something like proxy that can access the
+ * database.
+ * Write method is the point where the data are fetched from database and that's
+ * why is slow.
  * Code example:
+ * 
  * <pre>
- *   MemoryOutput output = new MemoryOutput();
- *   ResultProcessor processor = new ResultProcessor(results, firstResult, maxResults);
- *   processor.write(output);
+ * MemoryOutput output = new MemoryOutput();
+ * ResultProcessor processor = new ResultProcessor(results, firstResult, maxResults);
+ * processor.write(output);
  * </pre>
  *
  * @author Jakub Kulaviak
  **/
-public class ResultProcessor
-{
+public class ResultProcessor {
     /**
      * Constructor.
      */
@@ -43,11 +46,12 @@ public class ResultProcessor
 
     /**
      * Writes results to output.
+     * 
      * @param resultIt iterator over results row
-     * @param output output
+     * @param output   output
      */
     public void write(Iterator<List<ResultElement>> resultIt, Output output) {
-        while (resultIt.hasNext())  {
+        while (resultIt.hasNext()) {
             List<ResultElement> row = resultIt.next();
             output.addResultItem(convertResultElementsToStrings(row));
         }
@@ -59,7 +63,7 @@ public class ResultProcessor
         for (ResultElement el : row) {
             if (el != null && el.getField() != null) {
                 if (el.getField() instanceof Date) {
-                    value = ConstraintValueParser.ISO_DATE_FORMAT.format(el.getField());
+                    value = ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) el.getField()).toInstant());
                 } else {
                     value = el.getField().toString();
                 }

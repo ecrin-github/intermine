@@ -21,18 +21,17 @@ import org.json.JSONObject;
 
 /**
  * A processor for summary results in JSON format.
+ * 
  * @author Alex Kalderimis
  */
-public class JSONSummaryProcessor extends JSONResultProcessor
-{
+public class JSONSummaryProcessor extends JSONResultProcessor {
 
     @Override
     protected Iterator<? extends Object> getResultsIterator(Iterator<List<ResultElement>> it) {
         return new SummaryIterator(it);
     }
 
-    private static class SummaryIterator implements Iterator<JSONObject>
-    {
+    private static class SummaryIterator implements Iterator<JSONObject> {
 
         private final Iterator<List<ResultElement>> it;
 
@@ -64,7 +63,7 @@ public class JSONSummaryProcessor extends JSONResultProcessor
             if (row.size() == 2) {
                 if (row.get(0).getField() instanceof Date) {
                     dict.put("item",
-                            ConstraintValueParser.ISO_DATE_FORMAT.format(row.get(0).getField()));
+                            ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) row.get(0).getField()).toInstant()));
                 } else {
                     dict.put("item", row.get(0).getField());
                 }

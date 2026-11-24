@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +73,8 @@ import org.intermine.webservice.server.output.XMLFormatter;
 /**
  *
  * Base class for web services. See methods of class to be able implement
- * subclass. <h3>Output</h3> There can be 3 types of output:
+ * subclass.
+ * <h3>Output</h3> There can be 3 types of output:
  * <ul>
  * <li>Only Error output
  * <li>Complete results - xml, tab separated, html
@@ -96,8 +99,7 @@ import org.intermine.webservice.server.output.XMLFormatter;
  * @author Alex Kalderimis
  * @version
  */
-public abstract class WebService
-{
+public abstract class WebService {
 
     /** Default jsonp callback **/
     public static final String DEFAULT_CALLBACK = "callback";
@@ -170,7 +172,8 @@ public abstract class WebService
      * @param name The name of the parameter
      * @return The value of the parameter. Never null, never blank.
      * @throws MissingParameterException
-     *             If the value of the parameter is blank or null.
+     *                                   If the value of the parameter is blank or
+     *                                   null.
      */
     protected String getRequiredParameter(String name) {
         String value = request.getParameter(name);
@@ -184,9 +187,9 @@ public abstract class WebService
      * Get a parameter this service deems to be optional, or the default value.
      *
      * @param name
-     *            The name of the parameter.
+     *                     The name of the parameter.
      * @param defaultValue
-     *            The default value.
+     *                     The default value.
      * @return The value provided, if there is a non-blank one, or the default
      *         value.
      */
@@ -204,7 +207,8 @@ public abstract class WebService
      *
      * @return The user's profile.
      * @throws ServiceForbiddenException
-     *             if this request resolves to an unauthenticated profile.
+     *                                   if this request resolves to an
+     *                                   unauthenticated profile.
      */
     protected Profile getAuthenticatedUser() {
         Profile profile = getPermission().getProfile();
@@ -223,7 +227,7 @@ public abstract class WebService
      * Get a parameter this service deems to be optional, or <code>null</code>.
      *
      * @param name
-     *            The name of the parameter.
+     *             The name of the parameter.
      * @return The value of the parameter, or <code>null</code>
      */
     protected String getOptionalParameter(String name) {
@@ -250,7 +254,7 @@ public abstract class WebService
     /**
      * Get the value of a parameter that should be interpreted as an integer.
      *
-     * @param name The name of the parameter.
+     * @param name         The name of the parameter.
      * @param defaultValue The value to return if none is provided by the user.
      * @return An integer
      * @throw BadRequestException if the user provided a mal-formed value.
@@ -270,7 +274,8 @@ public abstract class WebService
      * means this property must be set before the execute method is called.
      *
      * @param namespace
-     *            The name space to use (eg: "some.namespace"). May not be null.
+     *                  The name space to use (eg: "some.namespace"). May not be
+     *                  null.
      */
     protected void setNameSpace(String namespace) {
         if (namespace == null || namespace.endsWith(".")) {
@@ -292,7 +297,7 @@ public abstract class WebService
      * Get a configuration property by name.
      *
      * @param name
-     *            The name of the property to retrieve.
+     *             The name of the property to retrieve.
      * @return A configuration value.
      */
     protected String getProperty(String name) {
@@ -308,7 +313,7 @@ public abstract class WebService
      * to the core InterMine functionality.
      *
      * @param im
-     *            the InterMine application
+     *           the InterMine application
      */
     public WebService(InterMineAPI im) {
         this.im = im;
@@ -331,9 +336,9 @@ public abstract class WebService
      * each subclass must provide an implementation.
      *
      * @param request
-     *            The request, as received by the servlet.
+     *                 The request, as received by the servlet.
      * @param response
-     *            The response, as handled by the servlet.
+     *                 The response, as handled by the servlet.
      */
     public void service(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
@@ -374,14 +379,15 @@ public abstract class WebService
                     response.flushBuffer();
                 } else {
                     /*
-                    dataPackageOutput.flush() does 4 things -
-                    1. ensures header is printed    ensureHeaderIsPrinted();
-                    2. writes footer                writeFooter();
-                    3. flushes printwriter          writer.flush();
-                    4. closes printwriter           writer.close();
-
-                    In data package output, we don't need 1 and 2 so we just call 3 and 4 directly
-                    */
+                     * dataPackageOutput.flush() does 4 things -
+                     * 1. ensures header is printed ensureHeaderIsPrinted();
+                     * 2. writes footer writeFooter();
+                     * 3. flushes printwriter writer.flush();
+                     * 4. closes printwriter writer.close();
+                     * 
+                     * In data package output, we don't need 1 and 2 so we just call 3 and 4
+                     * directly
+                     */
                     out.flush();
                     out.close();
                 }
@@ -508,28 +514,29 @@ public abstract class WebService
      * request. It can be derived in a number of ways:
      *
      * <ul>
-     *   <li>
-     *     <h4>Basic Authentication</h3>
-     *     Standard username and password stuff - best avoided.
-     *   </li>
-     *   <li>
-     *     <h4>Token authentication</h4>
-     *     User passes back an opaque token which has no meaning outside of this
-     *     application. Recommended. The token can be either passed as the value of the
-     *     <code>token</code> query parameter, or provided in the
-     *     <code>Authorization</code> header with the string <code>"Token "</code>
-     *     preceding it, i.e.:
-     *     <code>Authorization: Token somelongtokenstring</code>
-     *   </li>
-     *   <li>
-     *     <h4>JWT bearer tokens</h4>
-     *     The user passes back a bearer token issued by someone we trust (could
-     *     include ourselves). This requires the configuration of a keystore
-     *     {@see KeyStoreBuilder}. Provides delegated authentication capabilities.
-     *     Overkill for most users. The token must be provided in the <code>Authorization</code>
-     *     header, preceded by the string <code>"Bearer "</code>, e.g.:
-     *     <code>Authorization: Bearer yourjwttokenhere</code>
-     *   </li>
+     * <li>
+     * <h4>Basic Authentication</h3>
+     * Standard username and password stuff - best avoided.
+     * </li>
+     * <li>
+     * <h4>Token authentication</h4>
+     * User passes back an opaque token which has no meaning outside of this
+     * application. Recommended. The token can be either passed as the value of the
+     * <code>token</code> query parameter, or provided in the
+     * <code>Authorization</code> header with the string <code>"Token "</code>
+     * preceding it, i.e.:
+     * <code>Authorization: Token somelongtokenstring</code>
+     * </li>
+     * <li>
+     * <h4>JWT bearer tokens</h4>
+     * The user passes back a bearer token issued by someone we trust (could
+     * include ourselves). This requires the configuration of a keystore
+     * {@see KeyStoreBuilder}. Provides delegated authentication capabilities.
+     * Overkill for most users. The token must be provided in the
+     * <code>Authorization</code>
+     * header, preceded by the string <code>"Bearer "</code>, e.g.:
+     * <code>Authorization: Bearer yourjwttokenhere</code>
+     * </li>
      * </ul>
      *
      * {@link "http://en.wikipedia.org/wiki/Basic_access_authentication"}
@@ -556,7 +563,7 @@ public abstract class WebService
                 }
             } else if (StringUtils.startsWith(authString, "Bearer ")) {
                 identity = getIdentityFromBearerToken(
-                    StringUtils.removeStart(authString, "Bearer "));
+                        StringUtils.removeStart(authString, "Bearer "));
             } else {
                 String identityAssertion = getIdentityAssertion();
                 if (StringUtils.isNotBlank(identityAssertion)) {
@@ -569,25 +576,25 @@ public abstract class WebService
             // Use a token if provided.
             if (identity != null) {
                 permission = pm.grantPermission(
-                     identity.getIssuer(),
-                     identity.getIdentity(),
-                     im.getClassKeys());
+                        identity.getIssuer(),
+                        identity.getIdentity(),
+                        im.getClassKeys());
             } else if (StringUtils.isNotEmpty(authToken)) {
                 permission = pm.getPermission(authToken, im.getClassKeys());
             } else {
-                 // Try and read the authString as a basic auth header.
-                 // Strip off the "Basic" part - but don't require it.
+                // Try and read the authString as a basic auth header.
+                // Strip off the "Basic" part - but don't require it.
                 final String encoded = StringUtils.removeStart(authString, "Basic ");
                 final String decoded = new String(Base64.decodeBase64(encoded.getBytes()));
                 final String[] parts = decoded.split(":", 2);
                 if (parts.length != 2) {
                     throw new UnauthorizedException(
-                             "Invalid request authentication. "
-                                     + "Authorization field contains invalid value. "
-                                     + "Decoded authorization value: "
-                                     + parts[0]);
+                            "Invalid request authentication. "
+                                    + "Authorization field contains invalid value. "
+                                    + "Decoded authorization value: "
+                                    + parts[0]);
                 }
-                 // Allow tokens to be passed in basic auth headers.
+                // Allow tokens to be passed in basic auth headers.
                 if (StringUtils.isEmpty(parts[1])) {
                     permission = pm.getPermission(parts[0], im.getClassKeys());
                 } else {
@@ -605,7 +612,6 @@ public abstract class WebService
     }
 
     private void sendError(Throwable t, HttpServletResponse response) {
-
         String msg = WebServiceConstants.SERVICE_FAILED_MSG;
         boolean showAllMsgs = webProperties.containsKey("i.am.a.dev");
 
@@ -641,17 +647,16 @@ public abstract class WebService
     }
 
     private void logError(Throwable t, String msg, int code) {
-
         // Stack traces for all!
-        String truncatedStackTrace = getTruncatedStackTrace(t);
+        String stackTrace = Arrays.toString(t.getStackTrace());
 
         if (code == Output.SC_INTERNAL_SERVER_ERROR) {
             LOG.error("Service failed by internal error. Request parameters: \n"
-                    + requestParametersToString() + t + "\n" + truncatedStackTrace);
+                    + requestParametersToString() + t + "\n" + msg + "\n" + stackTrace);
         } else {
             LOG.debug("Service didn't succeed. It's not an internal error. "
                     + "Reason: " + getErrorDescription(msg, code) + "\n"
-                    + truncatedStackTrace);
+                    + stackTrace);
         }
     }
 
@@ -734,10 +739,10 @@ public abstract class WebService
      * @return a truth value
      */
     // This should not be in the general case.
-    //public boolean formatIsCount() {
-    //    int format = getFormat();
-    //    return (format == Formats.COUNT || format == Formats.JSON_COUNT);
-    //}
+    // public boolean formatIsCount() {
+    // int format = getFormat();
+    // return (format == Formats.COUNT || format == Formats.JSON_COUNT);
+    // }
 
     /**
      * @return Whether or not the format is XML.
@@ -749,7 +754,7 @@ public abstract class WebService
     /**
      * Make the XML output given the HttpResponse's PrintWriter.
      *
-     * @param out The PrintWriter from the HttpResponse.
+     * @param out       The PrintWriter from the HttpResponse.
      * @param separator the line-separator for the client's platform.
      * @return An Output that produces good XML.
      */
@@ -763,7 +768,7 @@ public abstract class WebService
     /**
      * Make the default JSON output given the HttpResponse's PrintWriter.
      *
-     * @param out The PrintWriter from the HttpResponse.
+     * @param out       The PrintWriter from the HttpResponse.
      * @param separator The line-separator for the client's platform.
      * @return An Output that produces good JSON.
      */
@@ -820,6 +825,7 @@ public abstract class WebService
      * Get access to the underlying print-writer.
      *
      * Most services should not need this method.
+     * 
      * @return The raw print-writer.
      */
     protected PrintWriter getRawOutput() {
@@ -953,6 +959,7 @@ public abstract class WebService
     /**
      * If the request has a <code>filename</code> parameter then use that
      * for the fileName, otherwise use the default fileName
+     * 
      * @return the fileName to use for the exported file
      */
     protected String getRequestFileName() {
@@ -968,8 +975,8 @@ public abstract class WebService
     /**
      * Make the default output for this service.
      *
-     * @param out The response's PrintWriter.
-     * @param os The Response's output stream.
+     * @param out       The response's PrintWriter.
+     * @param os        The Response's output stream.
      * @param separator The client's line separator.
      * @return An Output. (default = new StreamedOutput(out, new TabFormatter()))
      */
@@ -983,7 +990,7 @@ public abstract class WebService
      * Make the default output for this service.
      *
      * @param out The response's PrintWriter.
-     * @param os The Response's output stream.
+     * @param os  The Response's output stream.
      * @return An Output. (default = new StreamedOutput(out, new TabFormatter()))
      */
     protected Output getDefaultOutput(PrintWriter out, OutputStream os) {
@@ -998,11 +1005,11 @@ public abstract class WebService
     public boolean wantsColumnHeaders() {
         String wantsCols = request
                 .getParameter(WebServiceRequestParser.ADD_HEADER_PARAMETER);
-                      // Assume none wanted if empty
+        // Assume none wanted if empty
         boolean no = (wantsCols == null || wantsCols.isEmpty()
-                      // interpret standard falsy values as false
+        // interpret standard falsy values as false
                 || "0".equals(wantsCols) || "false".equalsIgnoreCase(wantsCols)
-                      // but none is what we really expect.
+                // but none is what we really expect.
                 || "none".equalsIgnoreCase(wantsCols));
         // All other values, including "true", "True", 1, and foo-bar are yes
         return !no;
@@ -1035,7 +1042,6 @@ public abstract class WebService
         return Format.EMPTY;
     }
 
-
     private Format format = null;
     private Boolean isJsonP = null;
 
@@ -1052,7 +1058,7 @@ public abstract class WebService
             if (askedFor.isEmpty()) {
                 format = getDefaultFormat();
             } else {
-                for (Format acceptable: askedFor) {
+                for (Format acceptable : askedFor) {
                     if (Format.DEFAULT == acceptable) {
                         format = getDefaultFormat();
                         break;
@@ -1078,7 +1084,8 @@ public abstract class WebService
     }
 
     /**
-     * For very picky services, you can just set it yourself, and say "s****w you requester".
+     * For very picky services, you can just set it yourself, and say "s****w you
+     * requester".
      *
      * Use this with caution, and fall-back to getFormat(). Please.
      *
@@ -1121,7 +1128,7 @@ public abstract class WebService
      * and manage all the things alone.
      *
      * @throws Exception
-     *             if some error occurs
+     *                   if some error occurs
      */
     protected abstract void execute() throws Exception;
 
@@ -1138,6 +1145,7 @@ public abstract class WebService
      *
      * By default returns true. Services with a particular set of accepted
      * formats should override this and check.
+     * 
      * @param format The format to check.
      * @return whether or not this format is acceptable.
      */

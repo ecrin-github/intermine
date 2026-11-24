@@ -23,13 +23,14 @@ import org.json.JSONArray;
  * @author Alexis Kalderimis
  *
  */
-public class MinimalJsonIterator implements Iterator<JSONArray>
-{
+public class MinimalJsonIterator implements Iterator<JSONArray> {
     private final Iterator<List<ResultElement>> subIter;
 
     /**
      * Constructor
-     * @param it An ExportResultsIterator that will be used internally to process the data.
+     * 
+     * @param it An ExportResultsIterator that will be used internally to process
+     *           the data.
      */
     public MinimalJsonIterator(Iterator<List<ResultElement>> it) {
         this.subIter = it;
@@ -50,7 +51,7 @@ public class MinimalJsonIterator implements Iterator<JSONArray>
                 if (field instanceof CharSequence) {
                     field = field.toString();
                 } else if (field instanceof Date) {
-                    field = ConstraintValueParser.ISO_DATE_FORMAT.format(field);
+                    field = ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) field).toInstant());
                 }
                 jsonRow.add(field);
             }

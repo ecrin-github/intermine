@@ -20,8 +20,7 @@ import java.util.Date;
  *
  * @author Radek Stepan
  */
-public class ReportObjectField
-{
+public class ReportObjectField {
     /**
      * @String field name (key, expression)
      */
@@ -52,12 +51,13 @@ public class ReportObjectField
 
     /**
      * Constructor
-     * @param objectType unqualified class name
-     * @param fieldName String
-     * @param fieldValue Object
+     * 
+     * @param objectType         unqualified class name
+     * @param fieldName          String
+     * @param fieldValue         Object
      * @param fieldDisplayerPage String
-     * @param doNotTruncate bool
-     * @param escapeXml bool
+     * @param doNotTruncate      bool
+     * @param escapeXml          bool
      */
     public ReportObjectField(
             String objectType,
@@ -70,7 +70,7 @@ public class ReportObjectField
         if (fieldValue instanceof String) {
             this.fieldValue = (fieldValue != null && fieldValue.equals("null")) ? "" : fieldValue;
         } else if (fieldValue instanceof Date) {
-            this.fieldValue = ConstraintValueParser.ISO_DATE_FORMAT.format(fieldValue);
+            this.fieldValue = ConstraintValueParser.ISO_DATE_FORMAT.format(((Date) fieldValue).toInstant());
         } else {
             this.fieldValue = fieldValue;
         }
@@ -82,13 +82,14 @@ public class ReportObjectField
 
     /**
      * Constructor
-     * @param objectType unqualified class name
-     * @param fieldName String
-     * @param fieldValue Object
+     * 
+     * @param objectType         unqualified class name
+     * @param fieldName          String
+     * @param fieldValue         Object
      * @param fieldDisplayerPage String
-     * @param doNotTruncate bool
-     * @param escapeXml bool
-     * @param label Meat-readable label.
+     * @param doNotTruncate      bool
+     * @param escapeXml          bool
+     * @param label              Meat-readable label.
      */
     public ReportObjectField(
             String objectType,
@@ -105,6 +106,7 @@ public class ReportObjectField
     /**
      * Get the label to display in the webapp for this field. If there is
      * no label, returns the name of the field instead.
+     * 
      * @return A human readable label.
      */
     public String getDisplayName() {
@@ -122,6 +124,7 @@ public class ReportObjectField
 
     /**
      * Get field name
+     * 
      * @return String
      */
     public String getName() {
@@ -130,6 +133,7 @@ public class ReportObjectField
 
     /**
      * Get field value
+     * 
      * @return Object
      */
     public Object getValue() {
@@ -154,6 +158,7 @@ public class ReportObjectField
 
     /**
      * Return path to a custom displayer
+     * 
      * @return String
      */
     public String getDisplayerPage() {
@@ -162,6 +167,7 @@ public class ReportObjectField
 
     /**
      * Does the field have a custom displayer defined for the value?
+     * 
      * @return boolean
      */
     public boolean getValueHasDisplayer() {
@@ -170,6 +176,7 @@ public class ReportObjectField
 
     /**
      * Get a path string to fetch field descriptions
+     * 
      * @return String
      */
     public String getPathString() {
