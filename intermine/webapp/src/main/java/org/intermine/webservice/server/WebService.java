@@ -650,19 +650,6 @@ public abstract class WebService {
         // Stack traces for all!
         String stackTrace = Arrays.toString(t.getStackTrace());
 
-        for (Throwable c = t; c != null; c = c.getCause()) {
-            LOG.error(c.getClass().getName() + ": " + c.getMessage());
-            LOG.error("stack frames: " + c.getStackTrace().length);
-        }
-        LOG.error("before suppressed");
-        LOG.error(Arrays.toString(t.getSuppressed()));
-
-        StringWriter sw = new StringWriter();
-        t.printStackTrace(new PrintWriter(sw));
-        String trace = sw.toString();
-        LOG.error("before printstacktrace");
-        LOG.error(trace);
-
         if (code == Output.SC_INTERNAL_SERVER_ERROR) {
             LOG.error("Service failed by internal error. Request parameters: \n"
                     + requestParametersToString() + t + "\n" + msg + "\n" + stackTrace);
